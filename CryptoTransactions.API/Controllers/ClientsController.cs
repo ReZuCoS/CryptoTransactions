@@ -1,6 +1,7 @@
 ﻿using CryptoTransactions.API.Model.Entities;
 using CryptoTransactions.API.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptoTransactions.API.Controllers
 {
@@ -25,7 +26,7 @@ namespace CryptoTransactions.API.Controllers
                 base.BadRequest();
 
             using var dbContext = new CryptoTransactionsContext();
-            IEnumerable<Client> clients = dbContext.Clients.ToList();
+            IEnumerable<Client> clients = dbContext.Clients.Include(c => c.SentTransactions).ToList();
 
             if (!clientQuery.IsEmpty())
                 clients = clients.Where(c =>

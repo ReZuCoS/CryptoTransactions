@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace CryptoTransactions.API.Model.Entities
@@ -54,10 +55,10 @@ namespace CryptoTransactions.API.Model.Entities
         [MaxLength(75)]
         public string TransactionType { get; set; } = default!;
 
-        [JsonIgnore]
-        public virtual Client Sender { get; set; } = default!;
+        //[JsonIgnore]
+        public virtual Client Sender { get; set; } = null!;
 
-        [JsonIgnore]
-        public virtual Client Recipient { get; set; } = default!;
+        //[JsonIgnore]
+        public virtual Client Recipient { get; set; } = null!;
     }
 }

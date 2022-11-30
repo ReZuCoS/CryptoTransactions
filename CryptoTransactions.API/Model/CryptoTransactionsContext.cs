@@ -24,14 +24,12 @@ namespace CryptoTransactions.API.Model
             modelBuilder.Entity<Client>()
                 .HasMany(c => c.SentTransactions)
                 .WithOne(t => t.Sender)
-                .HasForeignKey(t => t.SenderWallet)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(t => t.SenderWallet);
 
             modelBuilder.Entity<Client>()
                 .HasMany(c => c.ReceivedTransactions)
                 .WithOne(t => t.Recipient)
-                .HasForeignKey(t => t.RecipientWallet)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(t => t.RecipientWallet);
         }
     }
 }

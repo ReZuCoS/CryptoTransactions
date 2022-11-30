@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace CryptoTransactions.API.Model.Entities
@@ -56,13 +57,13 @@ namespace CryptoTransactions.API.Model.Entities
         [DefaultValue(0.0d)]
         public double Balance { get; set; }
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual ICollection<Transaction>? SentTransactions { get; set; }
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual ICollection<Transaction>? ReceivedTransactions { get; set; }
         
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual IEnumerable<Transaction>? Transactions =>
             SentTransactions.Union(ReceivedTransactions).OrderBy(t => t.TimeStamp);
 
