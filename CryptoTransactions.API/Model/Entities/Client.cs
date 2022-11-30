@@ -61,6 +61,10 @@ namespace CryptoTransactions.API.Model.Entities
 
         [JsonIgnore]
         public virtual ICollection<Transaction>? ReceivedTransactions { get; set; }
+        
+        [JsonIgnore]
+        public virtual IEnumerable<Transaction>? Transactions =>
+            SentTransactions.Union(ReceivedTransactions).OrderBy(t => t.TimeStamp);
 
         /// <summary>
         /// Generates new GUID for current client
