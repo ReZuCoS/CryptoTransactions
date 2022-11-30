@@ -48,7 +48,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// Client's patronymic (if available)
         /// </summary>
         [MaxLength(50)]
-        public string? Patronymic { get; set; }
+        public string? Patronymic { get; set; } = string.Empty;
 
         /// <summary>
         /// Client's balance
