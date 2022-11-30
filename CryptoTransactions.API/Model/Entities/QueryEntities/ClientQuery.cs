@@ -1,7 +1,7 @@
 ﻿namespace CryptoTransactions.API.Model.Entities
 {
     /// <summary>
-    /// Client patch data
+    /// Client query data
     /// </summary>
     public class ClientQuery
     {
