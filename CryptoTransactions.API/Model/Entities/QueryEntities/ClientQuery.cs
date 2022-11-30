@@ -19,5 +19,12 @@
         /// Client's patronymic (if available)
         /// </summary>
         public string Patronymic { get; set; } = string.Empty;
+
+        internal bool IsEmpty()
+        {
+            return string.IsNullOrEmpty(Surname) &&
+                string.IsNullOrEmpty(Name) &&
+                string.IsNullOrEmpty(Patronymic);
+        }
     }
 }
