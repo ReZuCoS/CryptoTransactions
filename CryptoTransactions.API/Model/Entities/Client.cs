@@ -23,7 +23,7 @@ namespace CryptoTransactions.API.Model.Entities
         }
 
         /// <summary>
-        /// GUID client wallet nuber
+        /// GUID client wallet number
         /// </summary>
         [Required]
         [MinLength(36)]
