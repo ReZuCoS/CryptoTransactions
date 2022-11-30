@@ -29,6 +29,10 @@ namespace CryptoTransactions.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.ConfigureSwaggerGen(c => {
+                var filePath = Path.Combine(AppContext.BaseDirectory, "CryptoTransactions.API.xml");
+                c.IncludeXmlComments(filePath);
+            });
 
             return builder.Build();
         }
