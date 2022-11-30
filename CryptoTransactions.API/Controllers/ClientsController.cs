@@ -16,19 +16,28 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned list</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         /// <response code="404">Clients count equals zero</response>
-        [HttpGet(Name = "GetClientsList")]
-        public IActionResult GetAll(int limit = 20, int offset = 0)
+        [HttpGet(Name = "GetClientsListWithFilter")]
+        public IActionResult GetAllFiltered([FromQuery] ClientQuery? clientQuery, int limit = 20,
+            int offset = 0)
         {
             if (limit < 0 || limit > 100)
                 base.BadRequest();
 
             using var dbContext = new CryptoTransactionsContext();
-            var clients = dbContext.Clients.Skip(offset)
+            IEnumerable<Client> clients = dbContext.Clients.ToList();
+
+            if (clientQuery is not null)
+                clients = clients.Where(c =>
+                    c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()) &&
+                    c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
+                    c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower()));
+
+            clients = clients.Skip(offset)
                 .Take(limit)
                 .ToList();
 
-            if (clients.Count.Equals(0))
-                return base.NotFound();
+            //if (clients.Count.Equals(0))
+            //    return base.NotFound();
 
             return base.Ok(clients);
         }
@@ -150,14 +159,14 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="400">Sended wallet number doesn't mach GUID standart</response>
         /// <response code="404">Wallet number not found</response>
         [HttpPatch("{walletNumber}", Name = "PatchClient")]
-        public IActionResult Patch(string walletNumber, ClientPatch patch)
+        public IActionResult Patch(string walletNumber, ClientQuery clientQuery)
         {
             if (Guid.TryParse(walletNumber, out _) == false)
                 return base.BadRequest();
 
-            if (string.IsNullOrEmpty(patch.Name) &&
-                string.IsNullOrEmpty(patch.Surname) &&
-                string.IsNullOrEmpty(patch.Patronymic))
+            if (string.IsNullOrEmpty(clientQuery.Name) &&
+                string.IsNullOrEmpty(clientQuery.Surname) &&
+                string.IsNullOrEmpty(clientQuery.Patronymic))
                 return base.StatusCode(304);
 
             using var dbContext = new CryptoTransactionsContext();
@@ -167,14 +176,16 @@ namespace CryptoTransactions.API.Controllers
 
             var client = dbContext.Clients.First(c => c.WalletNumber == walletNumber);
 
-            if (!string.IsNullOrEmpty(patch.Surname))
-                client.Surname = patch.Surname;
+            if (!string.IsNullOrEmpty(clientQuery.Surname))
+                client.Surname = clientQuery.Surname;
             
-            if (!string.IsNullOrEmpty(patch.Name))
-                client.Name = patch.Name;
+            if (!string.IsNullOrEmpty(clientQuery.Name))
+                client.Name = clientQuery.Name;
 
-            if (patch.Patronymic != null)
-                client.Patronymic = patch.Patronymic;
+            if (clientQuery.Patronymic != null)
+                client.Patronymic = clientQuery.Patronymic;
+            else
+                client.Patronymic = string.Empty;
 
             dbContext.Update(client);
             dbContext.SaveChangesAsync();
