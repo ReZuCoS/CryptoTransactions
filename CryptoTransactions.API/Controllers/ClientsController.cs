@@ -11,13 +11,14 @@ namespace CryptoTransactions.API.Controllers
         /// <summary>
         /// Returns clients list
         /// </summary>
+        /// <param name="clientQuery">Client fields to filter</param>
         /// <param name="limit">Count of returned results</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         /// <response code="404">Clients count equals zero</response>
         [HttpGet(Name = "GetClientsListWithFilter")]
-        public IActionResult GetAllFiltered([FromQuery] ClientQuery? clientQuery, int limit = 20,
+        public IActionResult GetAllFiltered([FromQuery] ClientQuery clientQuery, int limit = 20,
             int offset = 0)
         {
             if (limit < 0 || limit > 100)
@@ -26,7 +27,7 @@ namespace CryptoTransactions.API.Controllers
             using var dbContext = new CryptoTransactionsContext();
             IEnumerable<Client> clients = dbContext.Clients.ToList();
 
-            if (clientQuery is not null)
+            if (!clientQuery.IsEmpty())
                 clients = clients.Where(c =>
                     c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()) &&
                     c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
@@ -36,8 +37,8 @@ namespace CryptoTransactions.API.Controllers
                 .Take(limit)
                 .ToList();
 
-            //if (clients.Count.Equals(0))
-            //    return base.NotFound();
+            if (!clients.Any())
+                return base.NotFound();
 
             return base.Ok(clients);
         }
@@ -153,6 +154,7 @@ namespace CryptoTransactions.API.Controllers
         /// Updates client parameters
         /// </summary>
         /// <param name="walletNumber">Client wallet number which is going to update</param>
+        /// <param name="clientQuery">Client fields to patch</param>
         /// <response code="200">Success</response>
         /// <response code="202">Client pached</response>
         /// <response code="304">Nothing to change</response>
