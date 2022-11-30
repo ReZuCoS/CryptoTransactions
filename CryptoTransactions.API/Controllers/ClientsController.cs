@@ -1,6 +1,5 @@
 ﻿using CryptoTransactions.API.Model.Entities;
 using CryptoTransactions.API.Model;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoTransactions.API.Controllers
@@ -41,7 +40,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned client</response>
         /// <response code="400">Sended value doest mach GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
-        [HttpGet("{walletNumber:guid}", Name = "GetClientByWalletNumber")]
+        [HttpGet("{walletNumber}", Name = "GetClientByWalletNumber")]
         public IActionResult GetClientByWalletNumber(string walletNumber)
         {
             if (Guid.TryParse(walletNumber, out _) == false)
@@ -87,7 +86,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="walletNumber">Wallet number (GUID)</param>
         /// <response code="200">Success</response>
         /// <response code="202">Client removed</response>
-        /// <response code="400">Sended value doest mach GUID standart</response>
+        /// <response code="400">Sended wallet number doesn't mach GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
         [HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
         public IActionResult Delete(string walletNumber)
@@ -117,10 +116,14 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="client">Client data</param>
         /// <response code="200">Success</response>
         /// <response code="202">Client updated</response>
+        /// <response code="400">Sended wallet number doesn't mach GUID standart</response>
         /// <response code="404">Wallet number not found</response>
         [HttpPut("{walletNumber}", Name = "UpdateClient")]
         public IActionResult Update(string walletNumber, Client client)
         {
+            if (Guid.TryParse(walletNumber, out _) == false)
+                return base.BadRequest();
+
             using var dbContext = new CryptoTransactionsContext();
 
             if (!dbContext.Clients.Any(c => c.WalletNumber == walletNumber))
@@ -132,6 +135,51 @@ namespace CryptoTransactions.API.Controllers
             dbContext.SaveChangesAsync();
 
             var location = Url.Action(nameof(Update), new { client = client.WalletNumber }) ??
+                $"/{client.WalletNumber}";
+
+            return base.Accepted(location, client);
+        }
+
+        /// <summary>
+        /// Updates client parameters
+        /// </summary>
+        /// <param name="walletNumber">Client wallet number which is going to update</param>
+        /// <response code="200">Success</response>
+        /// <response code="202">Client pached</response>
+        /// <response code="304">Nothing to change</response>
+        /// <response code="400">Sended wallet number doesn't mach GUID standart</response>
+        /// <response code="404">Wallet number not found</response>
+        [HttpPatch("{walletNumber}", Name = "PatchClient")]
+        public IActionResult Patch(string walletNumber, ClientPatch patch)
+        {
+            if (Guid.TryParse(walletNumber, out _) == false)
+                return base.BadRequest();
+
+            if (string.IsNullOrEmpty(patch.Name) &&
+                string.IsNullOrEmpty(patch.Surname) &&
+                string.IsNullOrEmpty(patch.Patronymic))
+                return base.StatusCode(304);
+
+            using var dbContext = new CryptoTransactionsContext();
+
+            if (!dbContext.Clients.Any(c => c.WalletNumber == walletNumber))
+                return base.NotFound();
+
+            var client = dbContext.Clients.First(c => c.WalletNumber == walletNumber);
+
+            if (!string.IsNullOrEmpty(patch.Surname))
+                client.Surname = patch.Surname;
+            
+            if (!string.IsNullOrEmpty(patch.Name))
+                client.Name = patch.Name;
+
+            if (patch.Patronymic != null)
+                client.Patronymic = patch.Patronymic;
+
+            dbContext.Update(client);
+            dbContext.SaveChangesAsync();
+
+            var location = Url.Action(nameof(Patch), new { client = client.WalletNumber }) ??
                 $"/{client.WalletNumber}";
 
             return base.Accepted(location, client);
