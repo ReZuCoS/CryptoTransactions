@@ -14,12 +14,12 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="limit">Count of returned results</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
-        /// <response code="400">Limit must be lower than 50 and greather than 0</response>
+        /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         /// <response code="404">Clients count equals zero</response>
         [HttpGet(Name = "GetClientsList")]
         public IActionResult GetAll(int limit = 20, int offset = 0)
         {
-            if (limit < 0 || limit > 50)
+            if (limit < 0 || limit > 100)
                 base.BadRequest();
 
             using var dbContext = new CryptoTransactionsContext();
