@@ -26,7 +26,7 @@ namespace CryptoTransactions.API.Controllers
                 base.BadRequest();
 
             using var dbContext = new CryptoTransactionsContext();
-            IEnumerable<Client> clients = dbContext.Clients.Include(c => c.SentTransactions).ToList();
+            IEnumerable<Client> clients = dbContext.Clients.ToList();
 
             if (!clientQuery.IsEmpty())
                 clients = clients.Where(c =>
@@ -67,6 +67,63 @@ namespace CryptoTransactions.API.Controllers
         }
 
         /// <summary>
+        /// Returns client transactions by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <response code="200">Successfully returned transactions</response>
+        /// <response code="400">Sended value doest mach GUID standart</response>
+        /// <response code="404">Client wallet number not found</response>
+        [HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
+        public IActionResult GetClientTransactions(string walletNumber, int limit = 20,
+            int offset = 0)
+        {
+            if (Guid.TryParse(walletNumber, out _) == false)
+                return base.BadRequest();
+
+            using var dbContext = new CryptoTransactionsContext();
+            var transactions = dbContext.Transactions.Where(t =>
+                t.SenderWallet == walletNumber ||
+                t.RecipientWallet == walletNumber)
+                .Include(t => t.Sender)
+                .Include(t => t.Recipient)
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+            
+            if (!transactions.Any())
+                return base.NotFound();
+
+            return base.Ok(transactions);
+        }
+
+        /// <summary>
+        /// Returns client transactions by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <param name="transactionGUID">Transaction key parameters, separated by '$' symbol</param>
+        /// <response code="200">Successfully returned transactions</response>
+        /// <response code="400">Sended value doest mach GUID standart</response>
+        /// <response code="404">Client wallet number not found</response>
+        [HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
+        public IActionResult GetClientTransactionByKey(string walletNumber, string transactionGUID)
+        {
+            if (Guid.TryParse(walletNumber, out _) == false)
+                return base.BadRequest();
+
+            if (Guid.TryParse(transactionGUID, out _) == false)
+                return base.BadRequest();
+
+            using var dbContext = new CryptoTransactionsContext();
+            var transaction = dbContext.Transactions.FirstOrDefault(t =>
+                t.GUID == transactionGUID);
+
+            if (transaction is null)
+                return base.NotFound();
+
+            return base.LocalRedirect($"~/api/transactions/{transaction.GUID}");
+        }
+
+        /// <summary>
         /// Adds new client in database
         /// </summary>
         /// <param name="client">Client data</param>
@@ -76,8 +133,6 @@ namespace CryptoTransactions.API.Controllers
         public IActionResult AddNew(Client client)
         {
             using var dbContext = new CryptoTransactionsContext();
-
-            client.GenerateNewWalletNumber();
 
             if (dbContext.Clients.Any(c => c.WalletNumber == client.WalletNumber))
                 return base.Conflict();
@@ -145,56 +200,9 @@ namespace CryptoTransactions.API.Controllers
             dbContext.Update(client);
             dbContext.SaveChangesAsync();
 
-            var location = Url.Action(nameof(Update), new { client = client.WalletNumber }) ??
-                $"/{client.WalletNumber}";
-
-            return base.Accepted(location, client);
-        }
-
-        /// <summary>
-        /// Updates client parameters
-        /// </summary>
-        /// <param name="walletNumber">Client wallet number which is going to update</param>
-        /// <param name="clientQuery">Client fields to patch</param>
-        /// <response code="200">Success</response>
-        /// <response code="202">Client pached</response>
-        /// <response code="304">Nothing to change</response>
-        /// <response code="400">Sended wallet number doesn't mach GUID standart</response>
-        /// <response code="404">Wallet number not found</response>
-        [HttpPatch("{walletNumber}", Name = "PatchClient")]
-        public IActionResult Patch(string walletNumber, ClientQuery clientQuery)
-        {
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest();
-
-            if (string.IsNullOrEmpty(clientQuery.Name) &&
-                string.IsNullOrEmpty(clientQuery.Surname) &&
-                string.IsNullOrEmpty(clientQuery.Patronymic))
-                return base.StatusCode(304);
-
-            using var dbContext = new CryptoTransactionsContext();
-
-            if (!dbContext.Clients.Any(c => c.WalletNumber == walletNumber))
-                return base.NotFound();
-
-            var client = dbContext.Clients.First(c => c.WalletNumber == walletNumber);
-
-            if (!string.IsNullOrEmpty(clientQuery.Surname))
-                client.Surname = clientQuery.Surname;
-            
-            if (!string.IsNullOrEmpty(clientQuery.Name))
-                client.Name = clientQuery.Name;
-
-            if (clientQuery.Patronymic != null)
-                client.Patronymic = clientQuery.Patronymic;
-            else
-                client.Patronymic = string.Empty;
-
-            dbContext.Update(client);
-            dbContext.SaveChangesAsync();
-
-            var location = Url.Action(nameof(Patch), new { client = client.WalletNumber }) ??
-                $"/{client.WalletNumber}";
+            string link = client.WalletNumber;
+            var location = Url.Action(nameof(Update), new { client = link }) ??
+                $"/{link}";
 
             return base.Accepted(location, client);
         }
