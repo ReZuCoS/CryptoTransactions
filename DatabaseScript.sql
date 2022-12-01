@@ -3,7 +3,7 @@
 	WalletNumber TEXT PRIMARY KEY,
 	Surname TEXT NOT NULL,
 	Name TEXT NOT NULL,
-	Patronymic TEXT DEFAULT '' NULL,
+	Patronymic TEXT DEFAULT '' NOT NULL,
 	Balance REAL DEFAULT 0.0 NOT NULL
 );
 
