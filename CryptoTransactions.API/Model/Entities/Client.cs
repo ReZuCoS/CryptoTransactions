@@ -1,8 +1,6 @@
 ﻿using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace CryptoTransactions.API.Model.Entities
@@ -10,7 +8,6 @@ namespace CryptoTransactions.API.Model.Entities
     /// <summary>
     /// System client
     /// </summary>
-    [PrimaryKey(nameof(WalletNumber))]
     public class Client
     {
         /// <summary>
@@ -18,7 +15,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         public Client()
         {
-            WalletNumber = NewId.NextGuid().ToString();
+            GenerateNewWalletNumber();
             SentTransactions = new HashSet<Transaction>();
             ReceivedTransactions = new HashSet<Transaction>();
         }
@@ -26,10 +23,9 @@ namespace CryptoTransactions.API.Model.Entities
         /// <summary>
         /// GUID client wallet number
         /// </summary>
+        [Key]
         [Required]
-        [MinLength(36)]
-        [MaxLength(36)]
-        public string? WalletNumber { get; private set; }
+        public string WalletNumber { get; private set; } = default!;
 
         /// <summary>
         /// Client's surname
@@ -49,24 +45,20 @@ namespace CryptoTransactions.API.Model.Entities
         /// Client's patronymic (if available)
         /// </summary>
         [MaxLength(50)]
-        public string? Patronymic { get; set; } = string.Empty;
+        public string Patronymic { get; set; } = string.Empty;
 
         /// <summary>
         /// Client's balance
         /// </summary>
         [DefaultValue(0.0d)]
-        public double Balance { get; set; }
+        public double Balance { get;  private set; }
 
-        //[JsonIgnore]
-        public virtual ICollection<Transaction>? SentTransactions { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Transaction> SentTransactions { get; private set; }
 
-        //[JsonIgnore]
-        public virtual ICollection<Transaction>? ReceivedTransactions { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Transaction> ReceivedTransactions { get; private set; }
         
-        //[JsonIgnore]
-        public virtual IEnumerable<Transaction>? Transactions =>
-            SentTransactions.Union(ReceivedTransactions).OrderBy(t => t.TimeStamp);
-
         /// <summary>
         /// Generates new GUID for current client
         /// </summary>
