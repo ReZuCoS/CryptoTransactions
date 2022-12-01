@@ -1,17 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace CryptoTransactions.API.Model.Entities
 {
     /// <summary>
     /// System transactions
     /// </summary>
-    [PrimaryKey(nameof(TimeStamp), nameof(SenderWallet), nameof(RecipientWallet))]
     public class Transaction
     {
+        public Transaction() =>
+            GenerateNewGUID();
+
+        /// <summary>
+        /// Transaction GUID
+        /// </summary>
+        [Key]
+        [Required]
+        public string GUID { get; private set; } = default!;
+
         /// <summary>
         /// Transaction date and time
         /// </summary>
@@ -55,10 +62,11 @@ namespace CryptoTransactions.API.Model.Entities
         [MaxLength(75)]
         public string TransactionType { get; set; } = default!;
 
-        //[JsonIgnore]
-        public virtual Client Sender { get; set; } = null!;
+        public virtual Client? Sender { get;  private set; }
 
-        //[JsonIgnore]
-        public virtual Client Recipient { get; set; } = null!;
+        public virtual Client? Recipient { get; private set; }
+
+        public void GenerateNewGUID() =>
+            GUID = NewId.NextGuid().ToString();
     }
 }
