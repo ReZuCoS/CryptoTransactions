@@ -1,4 +1,5 @@
 using CryptoTransactions.API.Model;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace CryptoTransactions.API
 {
@@ -11,7 +12,7 @@ namespace CryptoTransactions.API
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c => c.EnableTryItOutByDefault());
             }
 
             SetConnectionString(app.Configuration.GetConnectionString("CryptoTransactions"));
