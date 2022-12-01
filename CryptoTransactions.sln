@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{A6
 		DatabaseScript.sql = DatabaseScript.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTransactions.WindowsClient", "CryptoTransactions.WindowsClient\CryptoTransactions.WindowsClient.csproj", "{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{8E557820-573E-497C-BF4F-266B89ABBA7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E557820-573E-497C-BF4F-266B89ABBA7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E557820-573E-497C-BF4F-266B89ABBA7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
