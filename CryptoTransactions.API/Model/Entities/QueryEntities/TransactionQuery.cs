@@ -22,23 +22,11 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         public string RecipientWallet { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Currency type
-        /// </summary>
-        public string CurrencyType { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Transaction type
-        /// </summary>
-        public string TransactionType { get; set; } = string.Empty;
-
         public bool IsEmpty()
         {
             return string.IsNullOrEmpty(TimeStamp) &&
                 string.IsNullOrEmpty(SenderWallet) &&
-                string.IsNullOrEmpty(RecipientWallet) &&
-                string.IsNullOrEmpty(CurrencyType) &&
-                string.IsNullOrEmpty(TransactionType);
+                string.IsNullOrEmpty(RecipientWallet);
         }
     }
 }
