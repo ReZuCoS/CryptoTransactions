@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CryptoTransactions.API.Controllers
 {
     [ApiController]
-    [Route("api/routes")]
+    [Route("api/transactions")]
     public class TransactionsController : ControllerBase
     {
         /// <summary>
@@ -26,15 +26,14 @@ namespace CryptoTransactions.API.Controllers
                 base.BadRequest();
 
             using var dbContext = new CryptoTransactionsContext();
-            IEnumerable<Transaction> transactions = dbContext.Transactions.ToList();
+            IEnumerable<Transaction> transactions =
+                dbContext.Transactions.OrderBy(t => t.TimeStamp).ToList();
 
             if (!transactionQuery.IsEmpty())
                 transactions = transactions.Where(t =>
                     t.TimeStamp.Contains(transactionQuery.TimeStamp) &&
                     t.SenderWallet.Contains(transactionQuery.SenderWallet) &&
-                    t.RecipientWallet.Contains(transactionQuery.RecipientWallet) &&
-                    t.CurrencyType.Contains(transactionQuery.CurrencyType) &&
-                    t.TransactionType.Contains(transactionQuery.TransactionType));
+                    t.RecipientWallet.Contains(transactionQuery.RecipientWallet));
 
             transactions = transactions.Skip(offset)
                 .Take(limit)
@@ -46,24 +45,96 @@ namespace CryptoTransactions.API.Controllers
             return base.Ok(transactions);
         }
 
+        /// <summary>
+        /// Returns transaction by GUID
+        /// </summary>
+        /// <param name="transactionGUID">Transaction GUID</param>
+        /// <response code="200">Successfully returned transaction</response>
+        /// <response code="400">Sended value doest mach GUID standart</response>
+        /// <response code="404">GUID not found</response>
+        [HttpGet("{transactionGUID}", Name = "GetTransactionByGUID")]
+        public IActionResult GetTransactionByGUID(string transactionGUID)
+        {
+            if (Guid.TryParse(transactionGUID, out _) == false)
+                return base.BadRequest();
+
+            using var dbContext = new CryptoTransactionsContext();
+            var transaction = dbContext.Transactions.Include(t => t.Sender)
+                .Include(t => t.Recipient)
+                .FirstOrDefault(t =>
+                t.GUID == transactionGUID);
+
+            if (transaction is null)
+                return base.BadRequest();
+
+            return base.Ok(transaction);
+        }
+
+        /// <summary>
+        /// Adds new transaction in database
+        /// </summary>
+        /// <param name="transaction">Transaction data</param>
+        /// <response code="201">Successfully created</response>
+        /// <response code="409">Creation error. Check and resend data</response>
         [HttpPost(Name = "AddTransaction")]
         public IActionResult AddNew(Transaction transaction)
         {
             using var dbContext = new CryptoTransactionsContext();
 
-            if(dbContext.Transactions.Any(t =>
+            if (dbContext.Transactions.Any(t =>
                 t.TimeStamp == transaction.TimeStamp &&
                 t.SenderWallet == transaction.SenderWallet &&
                 t.RecipientWallet == transaction.RecipientWallet))
-                    return base.Conflict();
+                return base.Conflict();
+
+            if (dbContext.Transactions.Any(t =>
+                t.GUID == transaction.GUID))
+                return base.Conflict();
 
             dbContext.Transactions.Add(transaction);
             dbContext.SaveChangesAsync();
 
-            var location = Url.Action(nameof(AddNew), new { transaction = transaction.TimeStamp }) ??
-                $"/{transaction.TimeStamp}";
+            var link = transaction.GUID;
+
+            var location = Url.Action(nameof(AddNew),
+                new
+                {
+                    transaction = link.ToString(),
+                }) ?? $"/{link}";
 
             return base.Created(location, transaction);
+        }
+
+        /// <summary>
+        /// Deletes transaction by GUID
+        /// </summary>
+        /// <param name="transactionGUID">Transaction GUID</param>
+        /// <response code="202">Transaction removed</response>
+        /// <response code="400">Sended value doesn't mach GUID standart</response>
+        /// <response code="404">GUID not found</response>
+        [HttpDelete("{transactionGUID}", Name = "DeleteTransaction")]
+        public IActionResult Delete(string transactionGUID)
+        {
+            if (Guid.TryParse(transactionGUID, out _) == false)
+                return base.BadRequest();
+
+            using var dbContext = new CryptoTransactionsContext();
+            var transaction = dbContext.Transactions.FirstOrDefault(t =>
+            t.GUID == transactionGUID);
+
+            if (transaction is null)
+                return base.NotFound();
+
+            dbContext.Transactions.Remove(transaction);
+            dbContext.SaveChangesAsync();
+
+            var location = Url.Action(nameof(Delete),
+                new
+                {
+                    transaction = transaction.GUID,
+                }) ?? $"/{transaction.GUID}";
+
+            return base.Accepted(location);
         }
     }
 }
