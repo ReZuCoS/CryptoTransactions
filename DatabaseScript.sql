@@ -9,6 +9,7 @@
 
 CREATE TABLE Transactions
 (
+	GUID TEXT NOT NULL,
 	TimeStamp TEXT NOT NULL,
 	SenderWallet TEXT NOT NULL,
 	RecipientWallet TEXT NOT NULL,
@@ -16,7 +17,7 @@ CREATE TABLE Transactions
 	CurrencyType TEXT NOT NULL,
 	TransactionType TEXT NOT NULL,
 
-	PRIMARY KEY (TimeStamp, SenderWallet, RecipientWallet),
+	PRIMARY KEY (GUID),
 	FOREIGN KEY (SenderWallet) REFERENCES Clients(WalletNumber),
 	FOREIGN KEY (RecipientWallet) REFERENCES Clients(WalletNumber)
 );
