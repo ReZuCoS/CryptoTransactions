@@ -10,7 +10,7 @@ namespace CryptoTransactions.API.Model
         {
             get => _connectionString;
             set => _connectionString = !string.IsNullOrEmpty(value) ?
-                value : throw new ArgumentNullException(nameof(value));
+                value : throw new ArgumentNullException(nameof(ConnectionString));
         }
 
         public DbSet<Client> Clients { get; set; }
@@ -24,12 +24,14 @@ namespace CryptoTransactions.API.Model
             modelBuilder.Entity<Client>()
                 .HasMany(c => c.SentTransactions)
                 .WithOne(t => t.Sender)
-                .HasForeignKey(t => t.SenderWallet);
+                .HasForeignKey(t => t.SenderWallet)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Client>()
                 .HasMany(c => c.ReceivedTransactions)
                 .WithOne(t => t.Recipient)
-                .HasForeignKey(t => t.RecipientWallet);
+                .HasForeignKey(t => t.RecipientWallet)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
