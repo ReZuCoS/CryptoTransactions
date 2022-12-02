@@ -69,7 +69,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// Updates client GUID
         /// </summary>
         /// <param name="walletNumber">GUID to update</param>
-        public void UpdateWalletNumber(string walletNumber) =>
+        public void SetWalletNumber(string walletNumber) =>
             this.WalletNumber = walletNumber;
     }
 }
