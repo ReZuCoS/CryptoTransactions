@@ -67,6 +67,6 @@ namespace CryptoTransactions.API.Model.Entities
         public virtual Client? Recipient { get; private set; }
 
         public void GenerateNewGUID() =>
-            GUID = NewId.NextGuid().ToString();
+            GUID = NewId.NextGuid().ToString().ToLower();
     }
 }

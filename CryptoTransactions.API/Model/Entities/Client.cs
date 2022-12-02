@@ -63,7 +63,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// Generates new GUID for current client
         /// </summary>
         public void GenerateNewWalletNumber() =>
-            WalletNumber = NewId.NextGuid().ToString();
+            WalletNumber = NewId.NextGuid().ToString().ToLower();
 
         /// <summary>
         /// Updates client GUID
