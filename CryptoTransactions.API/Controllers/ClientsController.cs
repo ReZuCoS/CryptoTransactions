@@ -76,7 +76,6 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned transactions</response>
         /// <response code="204">Client's transactions count equals zero</response>
         /// <response code="400">Sended value doest match GUID standart</response>
-        /// <response code="404">Client wallet number not found</response>
         [HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
         public IActionResult GetClientTransactions(string walletNumber, int limit = 20,
             int offset = 0)
