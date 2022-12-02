@@ -156,10 +156,12 @@ namespace CryptoTransactions.API.Controllers
                     "Check client data and try again.\n" +
                     $"Error message: {ex.Message}");
             }
-
-            var location = Url.Action(nameof(AddNew), new { client = client.WalletNumber }) ??
+#if RELEASE
+            var location = base.Url.Action(nameof(AddNew), new { client = client.WalletNumber }) ??
                 $"/{client.WalletNumber}";
-
+#else
+            var location = $"~/api/clients/{client.WalletNumber}";
+#endif
             return base.Created(location, client);
         }
 
