@@ -10,7 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{A6
 		DatabaseScript.sql = DatabaseScript.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTransactions.WindowsClient", "CryptoTransactions.WindowsClient\CryptoTransactions.WindowsClient.csproj", "{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTransactions.WindowsClient", "CryptoTransactions.WindowsClient\CryptoTransactions.WindowsClient.csproj", "{B3623D5A-B5A2-44D7-BB83-FFF6E677D493}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4B5BCE34-07DA-4C34-925A-25338E4D886D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
