@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace CryptoTransactions.API.Model.Entities
+﻿namespace CryptoTransactions.API.Model.Entities.QueryEntities
 {
     /// <summary>
     /// System transactions

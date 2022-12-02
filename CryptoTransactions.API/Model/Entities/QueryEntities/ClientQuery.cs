@@ -1,4 +1,4 @@
-﻿namespace CryptoTransactions.API.Model.Entities
+﻿namespace CryptoTransactions.API.Model.Entities.QueryEntities
 {
     /// <summary>
     /// Client query data
