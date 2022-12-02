@@ -2,7 +2,6 @@
 using CryptoTransactions.API.Model.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace CryptoTransactions.API.Controllers
 {
@@ -17,6 +16,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="limit">Count of returned results</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
+        /// <response code="204">Transactions count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         /// <response code="404">Transactions count equals zero</response>
         [HttpGet(Name = "GetAllTransactionsFiltered")]
@@ -41,7 +41,7 @@ namespace CryptoTransactions.API.Controllers
                 .ToList();
 
             if (!transactions.Any())
-                return base.NotFound("Transactions not found");
+                return base.NoContent();
 
             return base.Ok(transactions);
         }

@@ -16,8 +16,8 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="limit">Count of returned results</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
+        /// <response code="204">Clients count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
-        /// <response code="404">Clients count equals zero</response>
         [HttpGet(Name = "GetClientsListWithFilter")]
         public IActionResult GetAllFiltered([FromQuery] ClientQuery clientQuery, int limit = 20,
             int offset = 0)
@@ -39,7 +39,7 @@ namespace CryptoTransactions.API.Controllers
                 .ToList();
 
             if (!clients.Any())
-                return base.NotFound("Clients not found");
+                return base.NoContent();
 
             return base.Ok(clients);
         }
@@ -73,6 +73,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="limit">Count of returned results</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned transactions</response>
+        /// <response code="204">Client's transactions count equals zero</response>
         /// <response code="400">Sended value doest match GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
         [HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
@@ -96,7 +97,7 @@ namespace CryptoTransactions.API.Controllers
                 .ToList();
             
             if (!transactions.Any())
-                return base.NotFound("Client transactions not found");
+                return base.NoContent();
 
             return base.Ok(transactions);
         }
