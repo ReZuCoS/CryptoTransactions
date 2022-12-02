@@ -7,7 +7,7 @@ namespace CryptoTransactions.API.Controllers
 {
     [ApiController]
     [Route("api/transactions")]
-    public class TransactionsController : ControllerBase
+    public sealed class TransactionsController : ControllerBase
     {
         /// <summary>
         /// Returns transactions list
@@ -77,6 +77,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="transaction">Transaction data</param>
         /// <response code="201">Successfully created</response>
         /// <response code="409">Creation error. Check and resend data</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddTransaction")]
         public IActionResult AddNew(Transaction transaction)
         {
@@ -92,8 +93,17 @@ namespace CryptoTransactions.API.Controllers
                 t.GUID == transaction.GUID))
                 return base.Conflict("Transaction GUID alredy exists. Try to resend data");
 
-            dbContext.Transactions.Add(transaction);
-            dbContext.SaveChangesAsync();
+            try
+            {
+                dbContext.Transactions.Add(transaction);
+                dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check transaction data and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
 
             var link = transaction.GUID;
 
@@ -113,6 +123,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="202">Transaction removed</response>
         /// <response code="400">Sended value doesn't match GUID standart</response>
         /// <response code="404">GUID not found</response>
+        /// <response code="500">Internal server error</response>
         [HttpDelete("{transactionGUID}", Name = "DeleteTransaction")]
         public IActionResult Delete(string transactionGUID)
         {
@@ -126,8 +137,17 @@ namespace CryptoTransactions.API.Controllers
             if (transaction is null)
                 return base.NotFound("Transaction not found");
 
-            dbContext.Transactions.Remove(transaction);
-            dbContext.SaveChangesAsync();
+            try
+            {
+                dbContext.Transactions.Remove(transaction);
+                dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check transaction GUID and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
 
             var location = Url.Action(nameof(Delete),
                 new
