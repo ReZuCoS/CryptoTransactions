@@ -1,5 +1,4 @@
 using CryptoTransactions.API.Model;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace CryptoTransactions.API
 {
