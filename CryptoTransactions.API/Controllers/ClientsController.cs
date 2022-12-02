@@ -116,6 +116,7 @@ namespace CryptoTransactions.API.Controllers
         {
             if (Guid.TryParse(walletNumber, out _) == false)
                 return base.BadRequest("Sended wallet number doest match GUID standart");
+
             if (Guid.TryParse(transactionGUID, out _) == false)
                 return base.BadRequest("Sended transactionGUID number doest match GUID standart");
 
