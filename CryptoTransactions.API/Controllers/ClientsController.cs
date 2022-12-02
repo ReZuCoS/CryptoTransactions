@@ -109,7 +109,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="transactionGUID">Transaction key parameters, separated by '$' symbol</param>
         /// <response code="200">Successfully returned transactions</response>
         /// <response code="400">Sended value doest match GUID standart</response>
-        /// <response code="404">Client wallet number not found</response>
+        /// <response code="404">Transaction GUID number not found</response>
         [HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
         public IActionResult GetClientTransactionByKey(string walletNumber,
             string transactionGUID)
