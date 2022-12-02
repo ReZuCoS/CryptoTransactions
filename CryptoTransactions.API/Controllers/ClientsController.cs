@@ -24,7 +24,7 @@ namespace CryptoTransactions.API.Controllers
             int offset = 0)
         {
             if (limit < 0 || limit > 100)
-                base.BadRequest("Limit value must be in range (0 - 100)");
+                return base.BadRequest("Limit value must be in range (0 - 100)");
 
             using var dbContext = new CryptoTransactionsContext();
             IEnumerable<Client> clients = dbContext.Clients.ToList();
@@ -82,7 +82,7 @@ namespace CryptoTransactions.API.Controllers
             int offset = 0)
         {
             if (limit < 0 || limit > 100)
-                base.BadRequest("Limit value must be in range (0 - 100)");
+                return base.BadRequest("Limit value must be in range (0 - 100)");
 
             if (Guid.TryParse(walletNumber, out _) == false)
                 return base.BadRequest("Sended wallet number doest match GUID standart");
