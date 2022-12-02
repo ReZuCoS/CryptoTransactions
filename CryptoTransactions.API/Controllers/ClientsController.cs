@@ -1,4 +1,5 @@
 ﻿using CryptoTransactions.API.Model.Entities;
+using CryptoTransactions.API.Model.Entities.QueryEntities;
 using CryptoTransactions.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
