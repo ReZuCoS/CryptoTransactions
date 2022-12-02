@@ -9,7 +9,7 @@ namespace CryptoTransactions.API
             var app = GenerateApplication(args);
 
             SetConnectionString(app.Configuration.GetConnectionString("CryptoTransactions"));
-            
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
