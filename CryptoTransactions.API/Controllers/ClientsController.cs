@@ -7,7 +7,7 @@ namespace CryptoTransactions.API.Controllers
 {
     [ApiController]
     [Route("api/clients")]
-    public class ClientsController : ControllerBase
+    public sealed class ClientsController : ControllerBase
     {
         /// <summary>
         /// Returns clients list
@@ -40,7 +40,7 @@ namespace CryptoTransactions.API.Controllers
 
             if (!clients.Any())
                 return base.NoContent();
-
+            
             return base.Ok(clients);
         }
 
@@ -111,7 +111,8 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="400">Sended value doest match GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
         [HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
-        public IActionResult GetClientTransactionByKey(string walletNumber, string transactionGUID)
+        public IActionResult GetClientTransactionByKey(string walletNumber,
+            string transactionGUID)
         {
             if (Guid.TryParse(walletNumber, out _) == false)
                 return base.BadRequest("Sended wallet number doest match GUID standart");
@@ -134,6 +135,7 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="client">Client data</param>
         /// <response code="201">Successfully created</response>
         /// <response code="409">Creation error. Try to resend data</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddClient")]
         public IActionResult AddNew(Client client)
         {
@@ -142,8 +144,17 @@ namespace CryptoTransactions.API.Controllers
             if (dbContext.Clients.Any(c => c.WalletNumber == client.WalletNumber))
                 return base.Conflict("Wallet number alredy exists. Try to resend data");
 
-            dbContext.Clients.Add(client);
-            dbContext.SaveChangesAsync();
+            try
+            {
+                dbContext.Clients.Add(client);
+                dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check client data and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
 
             var location = Url.Action(nameof(AddNew), new { client = client.WalletNumber }) ??
                 $"/{client.WalletNumber}";
@@ -159,6 +170,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="202">Client removed</response>
         /// <response code="400">Sended value doesn't match GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
+        /// <response code="500">Internal server error</response>
         [HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
         public IActionResult Delete(string walletNumber)
         {
@@ -170,9 +182,17 @@ namespace CryptoTransactions.API.Controllers
 
             if (client is null)
                 return base.NotFound("Client not found");
-
-            dbContext.Clients.Remove(client);
-            dbContext.SaveChangesAsync();
+            try
+            {
+                dbContext.Clients.Remove(client);
+                dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check client wallet number and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
 
             var location = Url.Action(nameof(Delete), new { client = client.WalletNumber }) ??
                 $"/{client.WalletNumber}";
@@ -189,6 +209,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="202">Client updated</response>
         /// <response code="400">Sended value doesn't match GUID standart</response>
         /// <response code="404">Wallet number not found</response>
+        /// <response code="500">Internal server error</response>
         [HttpPut("{walletNumber}", Name = "UpdateClient")]
         public IActionResult Update(string walletNumber, Client client)
         {
@@ -200,10 +221,19 @@ namespace CryptoTransactions.API.Controllers
             if (!dbContext.Clients.Any(c => c.WalletNumber == walletNumber))
                 return base.NotFound("Client not found");
 
-            client.UpdateWalletNumber(walletNumber);
+            client.SetWalletNumber(walletNumber);
 
-            dbContext.Update(client);
-            dbContext.SaveChangesAsync();
+            try
+            {
+                dbContext.Clients.Update(client);
+                dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check client data and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
 
             string link = client.WalletNumber;
             var location = Url.Action(nameof(Update), new { client = link }) ??
