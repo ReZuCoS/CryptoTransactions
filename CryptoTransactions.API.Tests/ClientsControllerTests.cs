@@ -17,8 +17,8 @@ namespace CryptoTransactions.API.Tests
         [Order(1)]
         [TestCase(200, 5)]
         [TestCase(200, 3, 3, 2)]
-        [TestCase(200, 2, 5, 0, "Со")]
-        [TestCase(200, 1, 5, 0, "", "С", "С")]
+        [TestCase(200, 2, 5, 0, "Mendez")]
+        [TestCase(200, 1, 5, 0, "", "Owen", "Smith")]
         public void GetClientsFiltered_Positive(int expectedCode,
             int expectedResultsCount,
             int limit = 5, int offset = 0,
@@ -47,8 +47,8 @@ namespace CryptoTransactions.API.Tests
         [Order(2)]
         [TestCase(204, 0, 0)]
         [TestCase(204, 5, 5)]
-        [TestCase(204, 5, 0, "Григоренко")]
-        [TestCase(204, 5, 0, "Софронов", "Анатолий")]
+        [TestCase(204, 5, 0, "Smith")]
+        [TestCase(204, 5, 0, "Rick", "Buffer")]
         public void GetClientsFiltered_NoContent(int expectedCode,
             int limit = 5, int offset = 0,
             string surname = "", string name = "", string patronymic = "")
@@ -99,9 +99,9 @@ namespace CryptoTransactions.API.Tests
 
             var expectedClient = new Client()
             {
-                Surname = "Иванов",
-                Name = "Иван",
-                Patronymic = "Иванович"
+                Surname = "Mendez",
+                Name = "Anthony",
+                Patronymic = "Morgan"
             };
 
             var controller = new ClientsController();
@@ -218,7 +218,7 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(11)]
-        [TestCase(201, "Благов", "Евгений", "Павлович")]
+        [TestCase(201, "Kevin", "Ethan", "Roberts")]
         public void AddNewClient_Positive(int expectedCode,
             string surname, string name,
             string patronymic)
