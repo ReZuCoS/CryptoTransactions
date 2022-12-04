@@ -9,21 +9,19 @@ namespace CryptoTransactions.API.Tests
 {
     public class ClientsControllerTests
     {
-        private static readonly ClientsController TestController = new();
-
         [SetUp]
         public void Setup() =>
             CryptoTransactionsContext.ConnectionString = $"Data source = " +
             $"{Environment.CurrentDirectory}\\SampleData\\CryptoTransactionsDEBUG.db";
 
-        #region GET_Tests
         [Order(1)]
         [TestCase(200, 5)]
         [TestCase(200, 3, 3, 2)]
         [TestCase(200, 2, 5, 0, "Mendez")]
         [TestCase(200, 1, 5, 0, "", "Owen", "Smith")]
         public void GetClientsFiltered_Positive(int expectedCode,
-            int expectedResultsCount, int limit = 5, int offset = 0,
+            int expectedResultsCount,
+            int limit = 5, int offset = 0,
             string surname = "", string name = "", string patronymic = "")
         {
             var query = new ClientQuery()
@@ -33,7 +31,8 @@ namespace CryptoTransactions.API.Tests
                 Patronymic = patronymic
             };
 
-            var result = TestController.GetAllFiltered(query, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetAllFiltered(query, limit, offset);
 
             var okResult = result as ObjectResult;
             var okList = okResult.Value as IEnumerable<Client>;
@@ -61,7 +60,8 @@ namespace CryptoTransactions.API.Tests
                 Patronymic = patronymic
             };
 
-            var result = TestController.GetAllFiltered(query, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetAllFiltered(query, limit, offset);
 
             var okResult = result as StatusCodeResult;
 
@@ -82,7 +82,8 @@ namespace CryptoTransactions.API.Tests
                 Patronymic = patronymic
             };
 
-            var result = TestController.GetAllFiltered(query, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetAllFiltered(query, limit, offset);
 
             var statusResult = result as ObjectResult;
 
@@ -103,7 +104,8 @@ namespace CryptoTransactions.API.Tests
                 Patronymic = "Morgan"
             };
 
-            var result = TestController.GetClientByWalletNumber(walletNumber);
+            var controller = new ClientsController();
+            var result = controller.GetClientByWalletNumber(walletNumber);
 
             var statusResult = result as ObjectResult;
             var client = statusResult.Value as Client;
@@ -123,7 +125,8 @@ namespace CryptoTransactions.API.Tests
         public void GetClientByWalletNumber_Negative(int expectedCode,
             string walletNumber)
         {
-            var result = TestController.GetClientByWalletNumber(walletNumber);
+            var controller = new ClientsController();
+            var result = controller.GetClientByWalletNumber(walletNumber);
 
             var statusResult = result as ObjectResult;
 
@@ -138,7 +141,8 @@ namespace CryptoTransactions.API.Tests
             int expectedResultsCount, string walletNumber,
             int limit = 5, int offset = 0)
         {
-            var result = TestController.GetClientTransactions(walletNumber, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetClientTransactions(walletNumber, limit, offset);
 
             var statusResult = result as ObjectResult;
             var transactions = statusResult.Value as IEnumerable<Transaction>;
@@ -157,7 +161,8 @@ namespace CryptoTransactions.API.Tests
             string walletNumber,
             int limit = 5, int offset = 0)
         {
-            var result = TestController.GetClientTransactions(walletNumber, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetClientTransactions(walletNumber, limit, offset);
 
             var okResult = result as StatusCodeResult;
 
@@ -171,7 +176,8 @@ namespace CryptoTransactions.API.Tests
         public void GetClientTransactions_Negative(int expectedCode,
             string walletNumber, int limit = 5, int offset = 0)
         {
-            var result = TestController.GetClientTransactions(walletNumber, limit, offset);
+            var controller = new ClientsController();
+            var result = controller.GetClientTransactions(walletNumber, limit, offset);
 
             var statusResult = result as ObjectResult;
 
@@ -185,7 +191,8 @@ namespace CryptoTransactions.API.Tests
         public void GetClientTransactionByGuid_Positive(string expectedURL,
             string walletNumber, string transactionGUID)
         {
-            var result = TestController.GetClientTransactionByKey(walletNumber, transactionGUID);
+            var controller = new ClientsController();
+            var result = controller.GetClientTransactionByKey(walletNumber, transactionGUID);
 
             var statusResult = result as LocalRedirectResult;
 
@@ -202,20 +209,19 @@ namespace CryptoTransactions.API.Tests
         public void GetClientTransactionByGuid_Negative(int expectedCode, string walletNumber,
             string transactionGUID)
         {
-            var result = TestController.GetClientTransactionByKey(walletNumber, transactionGUID);
+            var controller = new ClientsController();
+            var result = controller.GetClientTransactionByKey(walletNumber, transactionGUID);
 
             var statusResult = result as ObjectResult;
 
             Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
         }
-        #endregion
 
-        #region POST_Tests
         [Order(11)]
         [TestCase(201, "Kevin", "Ethan", "Roberts")]
-        [TestCase(201, "Alex", "Brandon", "Howard")]
         public void AddNewClient_Positive(int expectedCode,
-            string surname, string name, string patronymic)
+            string surname, string name,
+            string patronymic)
         {
             var client = new Client()
             {
@@ -224,7 +230,8 @@ namespace CryptoTransactions.API.Tests
                 Patronymic = patronymic
             };
 
-            var result = TestController.AddNew(client);
+            var controller = new ClientsController();
+            var result = controller.AddNew(client);
 
             var statusResult = result as ObjectResult;
 
@@ -237,115 +244,9 @@ namespace CryptoTransactions.API.Tests
             });
         }
 
-        [Order(12)]
-        [TestCase(409, "d0630000-5d0f-0015-2872-08da3058ad5a")]
-        [TestCase(409, "d1630000-5d0f-0015-2872-08da3058ad5a")]
-        [TestCase(409, "d4630000-5d0f-0015-2872-08da3058ad5a")]
-        public void AddNewClient_Negative(int expectedCode, string existWalletNumber)
+        public void AddNewClient_Negative()
         {
-            var client = new Client()
-            {
-                Surname = "Temporary",
-                Name = "Temporary",
-                Patronymic = "Temporary"
-            };
 
-            client.SetWalletNumber(existWalletNumber);
-
-            var result = TestController.AddNew(client);
-
-            var statusResult = result as ObjectResult;
-
-            using var dbContext = new CryptoTransactionsContext();
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-                Assert.That(dbContext.Clients.Contains(client), Is.True);
-            });
         }
-        #endregion
-
-        #region DELETE_Tests
-        [Order(13)]
-        [TestCase(202, "d3630000-5d0f-0015-2872-08da3058ad5a")]
-        public void DeleteClient_Positive(int expectedCode, string existWalletNumber)
-        {
-            var result = TestController.Delete(existWalletNumber);
-
-            var statusResult = result as ObjectResult;
-
-            using var dbContext = new CryptoTransactionsContext();
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-                Assert.That(dbContext.Clients.Any(c => c.WalletNumber == existWalletNumber), Is.False);
-            });
-        }
-
-        [Order(14)]
-        [TestCase(400, "NOT-GUID-VALUE")]
-        [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a")]
-        [TestCase(409, "d0630000-5d0f-0015-2872-08da3058ad5a")]
-        public void DeleteClient_Negative(int expectedCode, string walletNumber)
-        {
-            var result = TestController.Delete(walletNumber);
-        
-            var statusResult = result as ObjectResult;
-        
-            Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-        }
-        #endregion
-
-        #region PUT_Tests
-        [Order(15)]
-        [TestCase(202, "d0630000-5d0f-0015-2872-08da3058ad5a",
-            "Updated", "Updated", "Updated")]
-        [TestCase(202, "d1630000-5d0f-0015-2872-08da3058ad5a",
-            "Updated", "Updated", "Updated")]
-        public void UpdateClient_Positive(int expectedCode, string walletNumber,
-            string surname, string name, string patronymic)
-        {
-            var clientQuery = new Client()
-            {
-                Surname = surname,
-                Name = name,
-                Patronymic = patronymic
-            };
-
-            var result = TestController.Update(walletNumber, clientQuery);
-
-            var statusResult = result as ObjectResult;
-
-            using var dbContext = new CryptoTransactionsContext();
-            var updatedClient = dbContext.Clients.FirstOrDefault(c =>
-                c.WalletNumber == walletNumber);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-                Assert.That(updatedClient.Surname, Is.EqualTo(clientQuery.Surname));
-                Assert.That(updatedClient.Name, Is.EqualTo(clientQuery.Name));
-                Assert.That(updatedClient.Patronymic, Is.EqualTo(clientQuery.Patronymic));
-            });
-        }
-
-        [Order(16)]
-        [TestCase(400, "NOT-GUID-VALUE")]
-        [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a")]
-        public void UpdateClient_Negative(int expectedCode, string walletNumber)
-        {
-            var result = TestController.Update(walletNumber, null);
-
-            var statusResult = result as ObjectResult;
-
-            using var dbContext = new CryptoTransactionsContext();
-            var updatedClient = dbContext.Clients.FirstOrDefault(c =>
-                c.WalletNumber == walletNumber);
-
-            Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-        }
-        #endregion
     }
 }
