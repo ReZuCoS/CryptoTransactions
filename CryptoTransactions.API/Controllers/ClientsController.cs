@@ -27,13 +27,13 @@ namespace CryptoTransactions.API.Controllers
                 return base.BadRequest("Limit value must be in range (0 - 100)");
 
             using var dbContext = new CryptoTransactionsContext();
-            IEnumerable<Client> clients = dbContext.Clients.ToList();
+            var clients = dbContext.Clients.ToList();
 
             if (!clientQuery.IsEmpty())
                 clients = clients.Where(c =>
                     c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()) &&
                     c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
-                    c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower()));
+                    c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower())).ToList();
 
             clients = clients.Skip(offset)
                 .Take(limit)
@@ -156,13 +156,8 @@ namespace CryptoTransactions.API.Controllers
                     "Check client data and try again.\n" +
                     $"Error message: {ex.Message}");
             }
-#if RELEASE
-            var location = base.Url.Action(nameof(AddNew), new { client = client.WalletNumber }) ??
-                $"/{client.WalletNumber}";
-#else
-            var location = $"~/api/clients/{client.WalletNumber}";
-#endif
-            return base.Created(location, client);
+
+            return base.Created(GetLocation(nameof(AddNew), client), client);
         }
 
         /// <summary>
@@ -173,6 +168,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="202">Client removed</response>
         /// <response code="400">Sended value doesn't match GUID standart</response>
         /// <response code="404">Client wallet number not found</response>
+        /// <response code="409">Client has one or more transactions</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
         public IActionResult Delete(string walletNumber)
@@ -185,22 +181,29 @@ namespace CryptoTransactions.API.Controllers
 
             if (client is null)
                 return base.NotFound("Client not found");
+
             try
             {
                 dbContext.Clients.Remove(client);
-                dbContext.SaveChangesAsync();
+                dbContext.SaveChanges();
+            }
+            catch(DbUpdateException ex)
+            {
+                return base.Conflict("An error occurred while deleting " +
+                    "a client from the database. You cannot remove client, " +
+                    "which has one or more transactions" +
+                    $"Error message: {ex.Message}");
             }
             catch (Exception ex)
             {
+                Console.Write(ex.InnerException);
+
                 return base.StatusCode(500, "An error ocurred when saving database. " +
                     "Check client wallet number and try again.\n" +
                     $"Error message: {ex.Message}");
             }
 
-            var location = Url.Action(nameof(Delete), new { client = client.WalletNumber }) ??
-                $"/{client.WalletNumber}";
-
-            return base.Accepted(location);
+            return base.Accepted(GetLocation(nameof(Delete), client));
         }
 
         /// <summary>
@@ -238,11 +241,19 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            string link = client.WalletNumber;
-            var location = Url.Action(nameof(Update), new { client = link }) ??
-                $"/{link}";
+            return base.Accepted(GetLocation(nameof(Update), client), client);
+        }
 
-            return base.Accepted(location, client);
+        private static string GetLocation(string action, Client client)
+        {
+#if RELEASE
+            var location = base.Url.Action(action, new { client = client.WalletNumber }) ??
+                $"/{client.WalletNumber}";
+#else
+            var location = $"~/api/clients/{client.WalletNumber}";
+#endif
+
+            return location;
         }
     }
 }
