@@ -117,7 +117,18 @@ namespace CryptoTransactions.API.Controllers
             try
             {
                 dbContext.Transactions.Add(transaction);
+
+                sender.DecreaseBalance(transaction.Amount);
+                dbContext.Clients.Update(sender);
+
+                recipient.ReplenishBalance(transaction.Amount);
+                dbContext.Clients.Update(recipient);
+                
                 dbContext.SaveChangesAsync();
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return base.BadRequest("Sender balance lower than transaction amount!");
             }
             catch (Exception ex)
             {
