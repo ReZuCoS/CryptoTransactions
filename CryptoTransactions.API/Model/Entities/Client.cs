@@ -69,7 +69,10 @@ namespace CryptoTransactions.API.Model.Entities
             Balance += count;
 
         public void DecreaseBalance(double count) =>
-            Balance -= count;
+            Balance -= count <= Balance ?
+            count :
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(count)} cannot be more than balance");
 
         /// <summary>
         /// Updates client GUID
