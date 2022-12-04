@@ -65,6 +65,12 @@ namespace CryptoTransactions.API.Model.Entities
         public void GenerateNewWalletNumber() =>
             WalletNumber = NewId.NextGuid().ToString().ToLower();
 
+        public void ReplenishBalance(double count) =>
+            Balance += count;
+
+        public void DecreaseBalance(double count) =>
+            Balance -= count;
+
         /// <summary>
         /// Updates client GUID
         /// </summary>

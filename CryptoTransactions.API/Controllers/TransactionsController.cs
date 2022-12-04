@@ -77,6 +77,7 @@ namespace CryptoTransactions.API.Controllers
         /// </summary>
         /// <param name="transaction">Transaction data</param>
         /// <response code="201">Successfully created</response>
+        /// <response code="400"></response>
         /// <response code="409">Creation error. Check and resend data</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddTransaction")]
@@ -84,15 +85,34 @@ namespace CryptoTransactions.API.Controllers
         {
             using var dbContext = new CryptoTransactionsContext();
 
+            if (Guid.TryParse(transaction.SenderWallet, out _) == false)
+                return base.BadRequest("Sender wallet doesn't match GUID standart");
+
+            if (Guid.TryParse(transaction.RecipientWallet, out _) == false)
+                return base.BadRequest("Recipient wallet doesn't match GUID standart");
+
+            if (transaction.SenderWallet.Equals(transaction.RecipientWallet))
+                return base.BadRequest("Recipient and sender wallets cannot be equal");
+
+            var sender = dbContext.Clients.FirstOrDefault(c =>
+                c.WalletNumber == transaction.SenderWallet);
+            var recipient = dbContext.Clients.FirstOrDefault(c =>
+                c.WalletNumber == transaction.RecipientWallet);
+
+            if (sender is null)
+                return base.BadRequest("Sender wallet not found");
+
+            if (recipient is null)
+                return base.BadRequest("Recipient wallet not found");
+
+            if (dbContext.Transactions.Any(t => t.GUID == transaction.GUID))
+                return base.Conflict("Transaction GUID alredy exists. Try to resend data");
+
             if (dbContext.Transactions.Any(t =>
                 t.TimeStamp == transaction.TimeStamp &&
                 t.SenderWallet == transaction.SenderWallet &&
                 t.RecipientWallet == transaction.RecipientWallet))
                 return base.Conflict("Transaction alredy exists");
-
-            if (dbContext.Transactions.Any(t =>
-                t.GUID == transaction.GUID))
-                return base.Conflict("Transaction GUID alredy exists. Try to resend data");
 
             try
             {
