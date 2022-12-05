@@ -62,7 +62,7 @@ namespace CryptoTransactions.API.Model.Entities
         [MaxLength(75)]
         public string TransactionType { get; set; } = default!;
 
-        public virtual Client? Sender { get;  private set; }
+        public virtual Client? Sender { get; private set; }
 
         public virtual Client? Recipient { get; private set; }
 
