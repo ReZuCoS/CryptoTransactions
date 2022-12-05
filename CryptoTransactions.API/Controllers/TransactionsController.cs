@@ -76,7 +76,8 @@ namespace CryptoTransactions.API.Controllers
         /// </summary>
         /// <param name="transaction">Transaction data</param>
         /// <response code="201">Successfully created</response>
-        /// <response code="400"></response>
+        /// <response code="400">Request arguments errors</response>
+        /// <response code="400">Clients wallets not found</response>
         /// <response code="409">Creation error. Check and resend data</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddTransaction")]
@@ -93,16 +94,19 @@ namespace CryptoTransactions.API.Controllers
             if (transaction.SenderWallet.Equals(transaction.RecipientWallet))
                 return base.BadRequest("Recipient and sender wallets cannot be equal");
 
+            if (transaction.Amount <= 0)
+                return base.BadRequest("Transaction amount cannot be lower or equals zero");
+
             var sender = dbContext.Clients.FirstOrDefault(c =>
                 c.WalletNumber == transaction.SenderWallet);
             var recipient = dbContext.Clients.FirstOrDefault(c =>
                 c.WalletNumber == transaction.RecipientWallet);
 
             if (sender is null)
-                return base.BadRequest("Sender wallet not found");
+                return base.NotFound("Sender wallet not found");
 
             if (recipient is null)
-                return base.BadRequest("Recipient wallet not found");
+                return base.NotFound("Recipient wallet not found");
 
             if (dbContext.Transactions.Any(t => t.GUID == transaction.GUID))
                 return base.Conflict("Transaction GUID alredy exists. Try to resend data");
@@ -123,7 +127,7 @@ namespace CryptoTransactions.API.Controllers
                 recipient.ReplenishBalance(transaction.Amount);
                 dbContext.Clients.Update(recipient);
                 
-                dbContext.SaveChangesAsync();
+                dbContext.SaveChanges();
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -136,15 +140,7 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            var link = transaction.GUID;
-
-            var location = Url.Action(nameof(AddNew),
-                new
-                {
-                    transaction = link.ToString(),
-                }) ?? $"/{link}";
-
-            return base.Created(location, transaction);
+            return base.Created(GetLocation(nameof(Delete), transaction), transaction);
         }
 
         /// <summary>
@@ -180,13 +176,18 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            var location = Url.Action(nameof(Delete),
-                new
-                {
-                    transaction = transaction.GUID,
-                }) ?? $"/{transaction.GUID}";
+            return base.Accepted(GetLocation(nameof(Delete), transaction));
+        }
 
-            return base.Accepted(location);
+        private static string GetLocation(string action, Transaction transaction)
+        {
+#if RELEASE
+            var location = base.Url.Action(action, new { client = client.WalletNumber }) ??
+                $"/{client.WalletNumber}";
+#else
+            var location = $"~/api/clients/{transaction.GUID}";
+#endif
+            return location;
         }
     }
 }
