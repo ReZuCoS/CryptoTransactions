@@ -7,14 +7,9 @@ using NUnit.Framework;
 
 namespace CryptoTransactions.API.Tests
 {
-    public class ClientsControllerTests
+    public class ClientsControllerTests : ControllerTestBase
     {
         private static readonly ClientsController TestController = new();
-
-        [SetUp]
-        public void Setup() =>
-            CryptoTransactionsContext.ConnectionString = $"Data source = " +
-            $"{Environment.CurrentDirectory}\\SampleData\\CryptoTransactionsDEBUG.db";
 
         #region GET_Tests
         [Order(1)]
