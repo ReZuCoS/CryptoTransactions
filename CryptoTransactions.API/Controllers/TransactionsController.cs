@@ -19,13 +19,12 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned list</response>
         /// <response code="204">Transactions count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
-        /// <response code="404">Transactions count equals zero</response>
         [HttpGet(Name = "GetAllTransactionsFiltered")]
         public IActionResult GetAllFiltered([FromQuery] TransactionQuery transactionQuery,
             int limit = 20, int offset = 0)
         {
             if (limit < 0 || limit > 100)
-                base.BadRequest("Limit value must be in range(0 - 100)");
+                return base.BadRequest("Limit value must be in range(0 - 100)");
 
             using var dbContext = new CryptoTransactionsContext();
             IEnumerable<Transaction> transactions =
@@ -67,7 +66,7 @@ namespace CryptoTransactions.API.Controllers
                 t.GUID == transactionGUID);
 
             if (transaction is null)
-                return base.BadRequest("Transaction not found");
+                return base.NotFound("Transaction not found");
 
             return base.Ok(transaction);
         }
