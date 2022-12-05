@@ -23,6 +23,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// Transaction date and time
         /// </summary>
         [Required]
+        [DataType(DataType.DateTime)]
         public string TimeStamp { get; set; } = default!;
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         [Required]
         [DefaultValue(0.0d)]
+        [DataType(DataType.Currency)]
         public double Amount { get; set; }
 
         /// <summary>

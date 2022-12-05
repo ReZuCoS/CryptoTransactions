@@ -1,4 +1,6 @@
-﻿namespace CryptoTransactions.API.Model.Entities.QueryEntities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CryptoTransactions.API.Model.Entities.QueryEntities
 {
     /// <summary>
     /// System transactions
@@ -8,6 +10,7 @@
         /// <summary>
         /// Transaction date and time
         /// </summary>
+        [DataType(DataType.DateTime)]
         public string TimeStamp { get; set; } = string.Empty;
 
         /// <summary>
