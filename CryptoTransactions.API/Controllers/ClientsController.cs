@@ -252,7 +252,6 @@ namespace CryptoTransactions.API.Controllers
 #else
             var location = $"~/api/clients/{client.WalletNumber}";
 #endif
-
             return location;
         }
     }
