@@ -147,7 +147,6 @@ namespace CryptoTransactions.API.Tests
 
         [Order(7)]
         [TestCase(204, "d3630000-5d0f-0015-2872-08da3058ad5a", 5, 0)]
-        [TestCase(204, "d2630000-5d0f-0015-2872-08da3058ad5a", 1, 2)]
         public void GetClientTransactions_NoContent(int expectedCode,
             string walletNumber,
             int limit = 5, int offset = 0)
