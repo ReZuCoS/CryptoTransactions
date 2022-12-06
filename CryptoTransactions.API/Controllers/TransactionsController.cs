@@ -18,18 +18,18 @@ namespace CryptoTransactions.API.Controllers
         /// Returns transactions list
         /// </summary>
         /// <param name="transactionQuery">Transaction fields to filter</param>
-        /// <param name="limit">Count of returned results</param>
+        /// <param name="limit">Count of returned results (1 - 100)</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
         /// <response code="204">Transactions count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         [HttpGet(Name = "GetAllTransactionsFiltered")]
-        public IActionResult GetAllFiltered([FromQuery] TransactionQuery transactionQuery,
+        public async Task<IActionResult> GetAllFiltered([FromQuery] TransactionQuery transactionQuery,
             [Range(1, 100)] int limit = 20, [Range(0, int.MaxValue)] int offset = 0)
         {
-            var transactions = _databaseContext.Transactions
+            var transactions = await _databaseContext.Transactions
                 .OrderBy(t => t.TimeStamp)
-                .ToList();
+                .ToListAsync();
 
             if (!transactionQuery.IsEmpty())
                 transactions = transactions.Where(t =>
@@ -56,12 +56,12 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned transaction</response>
         /// <response code="404">Sended value doest match GUID standart</response>
         [HttpGet("{transactionGUID}", Name = "GetTransactionByGUID")]
-        public IActionResult GetTransactionByGUID([GuidValue] string transactionGUID)
+        public async Task<IActionResult> GetTransactionByGUID([GuidValue] string transactionGUID)
         {
-            var transaction = _databaseContext.Transactions
+            var transaction = await _databaseContext.Transactions
                 .Include(t => t.Sender)
                 .Include(t => t.Recipient)
-                .FirstOrDefault(t =>
+                .FirstOrDefaultAsync(t =>
                 t.GUID == transactionGUID);
 
             if (transaction is null)
@@ -80,7 +80,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="409">Creation error. Check and resend data</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddTransaction")]
-        public IActionResult AddNew(Transaction transaction)
+        public async Task<IActionResult> AddNew(Transaction transaction)
         {
             if (transaction.SenderWallet.Equals(transaction.RecipientWallet))
                 return base.BadRequest("Recipient and sender wallets cannot be equal");
@@ -110,7 +110,7 @@ namespace CryptoTransactions.API.Controllers
 
             try
             {
-                _databaseContext.Transactions.Add(transaction);
+                await _databaseContext.Transactions.AddAsync(transaction);
 
                 sender.DecreaseBalance(transaction.Amount);
                 _databaseContext.Clients.Update(sender);
@@ -118,7 +118,7 @@ namespace CryptoTransactions.API.Controllers
                 recipient.ReplenishBalance(transaction.Amount);
                 _databaseContext.Clients.Update(recipient);
                 
-                _databaseContext.SaveChanges();
+                await _databaseContext.SaveChangesAsync();
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -142,10 +142,10 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="404">Sended value doesn't match GUID standart</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete("{transactionGUID}", Name = "DeleteTransaction")]
-        public IActionResult Delete([GuidValue] string transactionGUID)
+        public async Task<IActionResult> Delete([GuidValue] string transactionGUID)
         {
-            var transaction = _databaseContext.Transactions.FirstOrDefault(t =>
-            t.GUID == transactionGUID);
+            var transaction = await _databaseContext.Transactions
+                .FirstOrDefaultAsync(t => t.GUID == transactionGUID);
 
             if (transaction is null)
                 return base.NotFound("Transaction not found");
@@ -153,7 +153,7 @@ namespace CryptoTransactions.API.Controllers
             try
             {
                 _databaseContext.Transactions.Remove(transaction);
-                _databaseContext.SaveChangesAsync();
+                await _databaseContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
