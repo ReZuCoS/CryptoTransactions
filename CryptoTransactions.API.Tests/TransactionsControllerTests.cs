@@ -14,9 +14,9 @@ namespace CryptoTransactions.API.Tests
 
         #region GET_Tests
         [Order(1)]
-        [TestCase(200, 3)]
-        [TestCase(200, 2, 3, 1)]
-        [TestCase(200, 1, 3, 0, "02.12.2022 16:25:35")]
+        [TestCase(200, 4)]
+        [TestCase(200, 3, 3, 1)]
+        [TestCase(200, 2, 3, 0, "02.12.2022 16:25:35")]
         [TestCase(200, 1, 3, 1, "", "", "d4630000-5d0f-0015-2872-08da3058ad5a")]
         public void GetTransactionsFiltered_Positive(int expectedCode,
             int expectedResultsCount, int limit = 20, int offset = 0,
@@ -44,7 +44,7 @@ namespace CryptoTransactions.API.Tests
 
         [Order(2)]
         [TestCase(204, 0, 0)]
-        [TestCase(204, 3, 3)]
+        [TestCase(204, 4, 4)]
         [TestCase(204, 3, 0, "02.12.2022 16:25:34")]
         [TestCase(204, 5, 0, "", "d1630000-5d0f-0015-2872-08da3058ad5a")]
         public void GetTransactionsFiltered_NoContent(int expectedCode,
@@ -64,28 +64,6 @@ namespace CryptoTransactions.API.Tests
             var okResult = result as StatusCodeResult;
 
             Assert.That(okResult.StatusCode, Is.EqualTo(expectedCode));
-        }
-
-        [Order(3)]
-        [TestCase(400, -1, 0)]
-        [TestCase(400, 150, 0)]
-        public void GetTransactionsFiltered_Negative(int expectedCode,
-            int limit = 20, int offset = 0,
-            string timeStamp = "", string senderWallet = "",
-            string recipientWallet = "")
-        {
-            var query = new TransactionQuery()
-            {
-                TimeStamp = timeStamp,
-                SenderWallet = senderWallet,
-                RecipientWallet = recipientWallet
-            };
-            
-            var result = TestController.GetAllFiltered(query, limit, offset);
-        
-            var statusResult = result as ObjectResult;
-        
-            Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
         }
 
         [Order(4)]
@@ -123,7 +101,7 @@ namespace CryptoTransactions.API.Tests
         }
         
         [Order(5)]
-        [TestCase(400, "NOT-GUID-VALUE-ID")]
+        [TestCase(404, "NOT-GUID-VALUE-ID")]
         [TestCase(404, "aaaaaaaa-4b2d-4643-bb08-039503d7d789")]
         public void GetTransactionsByGUID_Negative(int expectedCode,
             string transactionGUID)
@@ -185,10 +163,6 @@ namespace CryptoTransactions.API.Tests
         }
         
         [Order(7)]
-        [TestCase(400, "NOT-GUID-VALUE",
-            "d2630000-5d0f-0015-2872-08da3058ad5a", 4.0d, "Bitcoin", "Transaction")]
-        [TestCase(400, "d1630000-5d0f-0015-2872-08da3058ad5a",
-            "NOT-GUID-VALUE", 4.0d, "Bitcoin", "Transaction")]
         [TestCase(400, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a",
             "aaaaaaaa-5d0f-0015-2872-08da3058ad5a", 4.0d, "Bitcoin", "Transaction")]
         [TestCase(400, "d1630000-5d0f-0015-2872-08da3058ad5a",
@@ -251,7 +225,7 @@ namespace CryptoTransactions.API.Tests
         }
         
         [Order(9)]
-        [TestCase(400, "NOT-GUID-VALUE")]
+        [TestCase(404, "NOT-GUID-VALUE")]
         [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a")]
         public void DeleteTransaction_Negative(int expectedCode, string transactionGUID)
         {

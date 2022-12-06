@@ -41,8 +41,8 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(2)]
-        [TestCase(204, 0, 0)]
-        [TestCase(204, 5, 5)]
+        [TestCase(204, 1, 8)]
+        [TestCase(204, 7, 7)]
         [TestCase(204, 5, 0, "Smith")]
         [TestCase(204, 5, 0, "Rick", "Buffer")]
         public void GetClientsFiltered_NoContent(int expectedCode,
@@ -61,27 +61,6 @@ namespace CryptoTransactions.API.Tests
             var okResult = result as StatusCodeResult;
 
             Assert.That(okResult.StatusCode, Is.EqualTo(expectedCode));
-        }
-
-        [Order(3)]
-        [TestCase(400, -1, 0)]
-        [TestCase(400, 150, 0)]
-        public void GetClientsFiltered_Negative(int expectedCode,
-            int limit = 5, int offset = 0,
-            string surname = "", string name = "", string patronymic = "")
-        {
-            var query = new ClientQuery()
-            {
-                Surname = surname,
-                Name = name,
-                Patronymic = patronymic
-            };
-
-            var result = TestController.GetAllFiltered(query, limit, offset);
-
-            var statusResult = result as ObjectResult;
-
-            Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
         }
         
         [Order(4)]
@@ -113,7 +92,7 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(5)]
-        [TestCase(400, "NOT-GUID-VALUE-ID")]
+        [TestCase(404, "NOT-GUID-VALUE-ID")]
         [TestCase(404, "d3630000-5d0f-0015-ed68-08da3058ad5c")]
         public void GetClientByWalletNumber_Negative(int expectedCode,
             string walletNumber)
@@ -158,23 +137,9 @@ namespace CryptoTransactions.API.Tests
             Assert.That(okResult.StatusCode, Is.EqualTo(expectedCode));
         }
 
-        [Order(8)]
-        [TestCase(400, "NOT-GUID-VALUE-ID")]
-        [TestCase(400, "d3630000-5d0f-0015-ed68-08da3058ad5c", 120, 0)]
-        [TestCase(400, "d3630000-5d0f-0015-ed68-08da3058ad5c", -5, 0)]
-        public void GetClientTransactions_Negative(int expectedCode,
-            string walletNumber, int limit = 5, int offset = 0)
-        {
-            var result = TestController.GetClientTransactions(walletNumber, limit, offset);
-
-            var statusResult = result as ObjectResult;
-
-            Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
-        }
-
         [Order(9)]
         [TestCase("~/api/transactions/d0630000-5d0f-2015-2872-08da3058ad5a",
-            "d0630000-5d0f-0015-ed68-08da3058ad5c",
+            "d0630000-5d0f-0015-2872-08da3058ad5a",
             "d0630000-5d0f-2015-2872-08da3058ad5a")]
         public void GetClientTransactionByGuid_Positive(string expectedURL,
             string walletNumber, string transactionGUID)
@@ -187,9 +152,9 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(10)]
-        [TestCase(400, "NON-GUID-VALUE",
+        [TestCase(404, "NON-GUID-VALUE",
             "d0630000-5d0f-2015-2872-08da3058ad5a")]
-        [TestCase(400, "d0630000-5d0f-0015-ed68-08da3058ad5c",
+        [TestCase(404, "d0630000-5d0f-0015-ed68-08da3058ad5c",
             "NON-GUID-VALUE")]
         [TestCase(404, "d0630000-5d0f-0015-ed68-08da3058ad5c",
             "d0630000-5d0f-0015-ed68-08da3058ad5c")]
@@ -279,7 +244,7 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(14)]
-        [TestCase(400, "NOT-GUID-VALUE")]
+        [TestCase(404, "NOT-GUID-VALUE")]
         [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a")]
         [TestCase(409, "d0630000-5d0f-0015-2872-08da3058ad5a")]
         public void DeleteClient_Negative(int expectedCode, string walletNumber)
@@ -293,10 +258,10 @@ namespace CryptoTransactions.API.Tests
         #endregion
 
         #region PUT_Tests
-        [Order(15)]
-        [TestCase(202, "d0630000-5d0f-0015-2872-08da3058ad5a",
+        [Order(1)]
+        [TestCase(202, "d1130000-5d0f-0015-2872-08da3058ad5a",
             "Updated", "Updated", "Updated")]
-        [TestCase(202, "d1630000-5d0f-0015-2872-08da3058ad5a",
+        [TestCase(202, "d1230000-5d0f-0015-2872-08da3058ad5a",
             "Updated", "Updated", "Updated")]
         public void UpdateClient_Positive(int expectedCode, string walletNumber,
             string surname, string name, string patronymic)
@@ -326,7 +291,7 @@ namespace CryptoTransactions.API.Tests
         }
 
         [Order(16)]
-        [TestCase(400, "NOT-GUID-VALUE")]
+        [TestCase(404, "NOT-GUID-VALUE")]
         [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a")]
         public void UpdateClient_Negative(int expectedCode, string walletNumber)
         {

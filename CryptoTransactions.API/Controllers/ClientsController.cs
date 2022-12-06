@@ -27,9 +27,6 @@ namespace CryptoTransactions.API.Controllers
         public IActionResult GetAllFiltered([FromQuery] ClientQuery clientQuery, [Range(1, 100)] int limit = 20,
             [Range(0, int.MaxValue)] int offset = 0)
         {
-            if (limit < 1 || limit > 100)
-                return base.BadRequest("Limit value must be in range (1 - 100)");
-
             var clients = _databaseContext.Clients.ToList();
 
             if (!clientQuery.IsEmpty())
@@ -79,9 +76,6 @@ namespace CryptoTransactions.API.Controllers
         public IActionResult GetClientTransactions([GuidValue] string walletNumber, [Range(1, 100)] int limit = 20,
             [Range(0, int.MaxValue)] int offset = 0)
         {
-            if (limit < 1 || limit > 100)
-                return base.BadRequest("Limit value must be in range (1 - 100)");
-
             var transactions = _databaseContext.Transactions
                 .Where(t => t.SenderWallet == walletNumber || t.RecipientWallet == walletNumber)
                 .Include(t => t.Sender)
