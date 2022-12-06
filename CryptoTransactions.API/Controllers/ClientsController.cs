@@ -3,6 +3,8 @@ using CryptoTransactions.API.Model.Entities.QueryEntities;
 using CryptoTransactions.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using CryptoTransactions.API.Model.Validators;
 
 namespace CryptoTransactions.API.Controllers
 {
@@ -10,24 +12,25 @@ namespace CryptoTransactions.API.Controllers
     [Route("api/clients")]
     public sealed class ClientsController : ControllerBase
     {
+        private readonly CryptoTransactionsContext _databaseContext = new();
+
         /// <summary>
         /// Returns clients list
         /// </summary>
         /// <param name="clientQuery">Client fields to filter</param>
-        /// <param name="limit">Count of returned results</param>
+        /// <param name="limit">Count of returned results (1 - 100)</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned list</response>
         /// <response code="204">Clients count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
         [HttpGet(Name = "GetClientsListWithFilter")]
-        public IActionResult GetAllFiltered([FromQuery] ClientQuery clientQuery, int limit = 20,
-            int offset = 0)
+        public IActionResult GetAllFiltered([FromQuery] ClientQuery clientQuery, [Range(1, 100)] int limit = 20,
+            [Range(0, int.MaxValue)] int offset = 0)
         {
-            if (limit < 0 || limit > 100)
-                return base.BadRequest("Limit value must be in range (0 - 100)");
+            if (limit < 1 || limit > 100)
+                return base.BadRequest("Limit value must be in range (1 - 100)");
 
-            using var dbContext = new CryptoTransactionsContext();
-            var clients = dbContext.Clients.ToList();
+            var clients = _databaseContext.Clients.ToList();
 
             if (!clientQuery.IsEmpty())
                 clients = clients.Where(c =>
@@ -35,7 +38,8 @@ namespace CryptoTransactions.API.Controllers
                     c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
                     c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower())).ToList();
 
-            clients = clients.Skip(offset)
+            clients = clients
+                .Skip(offset)
                 .Take(limit)
                 .ToList();
 
@@ -50,16 +54,11 @@ namespace CryptoTransactions.API.Controllers
         /// </summary>
         /// <param name="walletNumber">Wallet number (GUID)</param>
         /// <response code="200">Successfully returned client</response>
-        /// <response code="400">Sended value doest match GUID standart</response>
-        /// <response code="404">Client wallet number not found</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
         [HttpGet("{walletNumber}", Name = "GetClientByWalletNumber")]
-        public IActionResult GetClientByWalletNumber(string walletNumber)
+        public IActionResult GetClientByWalletNumber([GuidValue] string walletNumber)
         {
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest("Sended wallet number doest match GUID standart");
-
-            using var dbContext = new CryptoTransactionsContext();
-            var client = dbContext.Clients.FirstOrDefault(c => c.WalletNumber == walletNumber);
+            var client = _databaseContext.Clients.FirstOrDefault(c => c.WalletNumber == walletNumber);
 
             if (client is null)
                 return base.NotFound("Client not found");
@@ -71,25 +70,20 @@ namespace CryptoTransactions.API.Controllers
         /// Returns client transactions by wallet number
         /// </summary>
         /// <param name="walletNumber">Wallet number (GUID)</param>
-        /// <param name="limit">Count of returned results</param>
+        /// <param name="limit">Count of returned results (1 - 100)</param>
         /// <param name="offset">ID offset (starts from 0)</param>
         /// <response code="200">Successfully returned transactions</response>
         /// <response code="204">Client's transactions count equals zero</response>
-        /// <response code="400">Sended value doest match GUID standart</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
         [HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
-        public IActionResult GetClientTransactions(string walletNumber, int limit = 20,
-            int offset = 0)
+        public IActionResult GetClientTransactions([GuidValue] string walletNumber, [Range(1, 100)] int limit = 20,
+            [Range(0, int.MaxValue)] int offset = 0)
         {
-            if (limit < 0 || limit > 100)
-                return base.BadRequest("Limit value must be in range (0 - 100)");
+            if (limit < 1 || limit > 100)
+                return base.BadRequest("Limit value must be in range (1 - 100)");
 
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest("Sended wallet number doest match GUID standart");
-
-            using var dbContext = new CryptoTransactionsContext();
-            var transactions = dbContext.Transactions.Where(t =>
-                t.SenderWallet == walletNumber ||
-                t.RecipientWallet == walletNumber)
+            var transactions = _databaseContext.Transactions
+                .Where(t => t.SenderWallet == walletNumber || t.RecipientWallet == walletNumber)
                 .Include(t => t.Sender)
                 .Include(t => t.Recipient)
                 .Skip(offset)
@@ -106,26 +100,26 @@ namespace CryptoTransactions.API.Controllers
         /// Returns client transactions by wallet number
         /// </summary>
         /// <param name="walletNumber">Wallet number (GUID)</param>
-        /// <param name="transactionGUID">Transaction key parameters, separated by '$' symbol</param>
+        /// <param name="transactionGUID">Transaction key (GUID)</param>
         /// <response code="200">Successfully returned transactions</response>
-        /// <response code="400">Sended value doest match GUID standart</response>
-        /// <response code="404">Transaction GUID number not found</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
         [HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
-        public IActionResult GetClientTransactionByKey(string walletNumber,
-            string transactionGUID)
+        public IActionResult GetClientTransactionByKey([GuidValue] string walletNumber,
+            [GuidValue] string transactionGUID)
         {
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest("Sended wallet number doest match GUID standart");
+            var client = _databaseContext.Clients
+                .Include(c => c.SentTransactions)
+                .Include(c => c.ReceivedTransactions)
+                .FirstOrDefault(c => c.WalletNumber.Equals(walletNumber));
+                
+            if (client is null)
+                return base.NotFound("Client not found");
 
-            if (Guid.TryParse(transactionGUID, out _) == false)
-                return base.BadRequest("Sended transactionGUID number doest match GUID standart");
-
-            using var dbContext = new CryptoTransactionsContext();
-            var transaction = dbContext.Transactions.FirstOrDefault(t =>
-                t.GUID == transactionGUID);
+            var transaction = client.Transactions
+                .FirstOrDefault(t => t.GUID.Equals(transactionGUID));
 
             if (transaction is null)
-                return base.NotFound("Transaction not found");
+                return base.NotFound("Client transaction not found");
 
             return base.LocalRedirect($"~/api/transactions/{transaction.GUID}");
         }
@@ -140,15 +134,13 @@ namespace CryptoTransactions.API.Controllers
         [HttpPost(Name = "AddClient")]
         public IActionResult AddNew(Client client)
         {
-            using var dbContext = new CryptoTransactionsContext();
-
-            if (dbContext.Clients.Any(c => c.WalletNumber == client.WalletNumber))
+            if (_databaseContext.Clients.Any(c => c.WalletNumber == client.WalletNumber))
                 return base.Conflict("Wallet number alredy exists. Try to resend data");
 
             try
             {
-                dbContext.Clients.Add(client);
-                dbContext.SaveChangesAsync();
+                _databaseContext.Clients.Add(client);
+                _databaseContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -157,7 +149,8 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.Created(GetLocation(nameof(AddNew), client), client);
+            return base.CreatedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
         }
 
         /// <summary>
@@ -166,26 +159,21 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="walletNumber">Wallet number (GUID)</param>
         /// <response code="200">Success</response>
         /// <response code="202">Client removed</response>
-        /// <response code="400">Sended value doesn't match GUID standart</response>
-        /// <response code="404">Client wallet number not found</response>
+        /// <response code="404">Sended value doest match GUID standart</response>
         /// <response code="409">Client has one or more transactions</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
-        public IActionResult Delete(string walletNumber)
+        public IActionResult Delete([GuidValue] string walletNumber)
         {
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest("Sended wallet number doesn't match GUID standart");
-
-            using var dbContext = new CryptoTransactionsContext();
-            var client = dbContext.Clients.FirstOrDefault(c => c.WalletNumber == walletNumber);
+            var client = _databaseContext.Clients.FirstOrDefault(c => c.WalletNumber == walletNumber);
 
             if (client is null)
                 return base.NotFound("Client not found");
 
             try
             {
-                dbContext.Clients.Remove(client);
-                dbContext.SaveChanges();
+                _databaseContext.Clients.Remove(client);
+                _databaseContext.SaveChanges();
             }
             catch(DbUpdateException ex)
             {
@@ -196,43 +184,36 @@ namespace CryptoTransactions.API.Controllers
             }
             catch (Exception ex)
             {
-                Console.Write(ex.InnerException);
-
                 return base.StatusCode(500, "An error ocurred when saving database. " +
                     "Check client wallet number and try again.\n" +
                     $"Error message: {ex.Message}");
             }
 
-            return base.Accepted(GetLocation(nameof(Delete), client));
+            return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
         }
 
         /// <summary>
         /// Updates client data
         /// </summary>
-        /// <param name="walletNumber">Client wallet number which is going to update</param>
+        /// <param name="walletNumber">Client wallet number which is going to update (GUID)</param>
         /// <param name="client">Client data</param>
         /// <response code="200">Success</response>
         /// <response code="202">Client updated</response>
-        /// <response code="400">Sended value doesn't match GUID standart</response>
-        /// <response code="404">Wallet number not found</response>
+        /// <response code="404">Sended value doesn't match GUID standart</response>
         /// <response code="500">Internal server error</response>
         [HttpPut("{walletNumber}", Name = "UpdateClient")]
-        public IActionResult Update(string walletNumber, Client client)
+        public IActionResult Update([GuidValue] string walletNumber, Client client)
         {
-            if (Guid.TryParse(walletNumber, out _) == false)
-                return base.BadRequest("Sended wallet number doesn't match GUID standart");
-
-            using var dbContext = new CryptoTransactionsContext();
-
-            if (!dbContext.Clients.Any(c => c.WalletNumber == walletNumber))
+            if (!_databaseContext.Clients.Any(c => c.WalletNumber.Equals(walletNumber)))
                 return base.NotFound("Client not found");
 
             client.SetWalletNumber(walletNumber);
 
             try
             {
-                dbContext.Clients.Update(client);
-                dbContext.SaveChangesAsync();
+                _databaseContext.Clients.Update(client);
+                _databaseContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -241,18 +222,8 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.Accepted(GetLocation(nameof(Update), client), client);
-        }
-
-        private static string GetLocation(string action, Client client)
-        {
-#if RELEASE
-            var location = base.Url.Action(action, new { client = client.WalletNumber }) ??
-                $"/{client.WalletNumber}";
-#else
-            var location = $"~/api/clients/{client.WalletNumber}";
-#endif
-            return location;
+            return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
         }
     }
 }
