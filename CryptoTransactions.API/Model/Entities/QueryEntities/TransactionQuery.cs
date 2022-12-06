@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CryptoTransactions.API.Model.Validators;
+using System.ComponentModel.DataAnnotations;
 
 namespace CryptoTransactions.API.Model.Entities.QueryEntities
 {
@@ -16,11 +17,13 @@ namespace CryptoTransactions.API.Model.Entities.QueryEntities
         /// <summary>
         /// GUID sender wallet number
         /// </summary>
+        [GuidValue]
         public string SenderWallet { get; set; } = string.Empty;
 
         /// <summary>
         /// GUID recipient wallet number
         /// </summary>
+        [GuidValue]
         public string RecipientWallet { get; set; } = string.Empty;
 
         public bool IsEmpty()
