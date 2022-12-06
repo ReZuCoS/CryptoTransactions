@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using CryptoTransactions.API.Model.Validators;
+using MassTransit;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -30,6 +31,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// GUID sender wallet number
         /// </summary>
         [Required]
+        [GuidValue]
         [MinLength(36)]
         [MaxLength(36)]
         public string SenderWallet { get; set; } = default!;
@@ -38,6 +40,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// GUID recipient wallet number
         /// </summary>
         [Required]
+        [GuidValue]
         [MinLength(36)]
         [MaxLength(36)]
         public string RecipientWallet { get; set; } = default!;
