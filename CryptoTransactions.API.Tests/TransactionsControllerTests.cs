@@ -32,7 +32,7 @@ namespace CryptoTransactions.API.Tests
 
             var result = TestController.GetAllFiltered(query, limit, offset);
         
-            var okResult = result as ObjectResult;
+            var okResult = result.Result as ObjectResult;
             var okList = okResult.Value as IEnumerable<Transaction>;
         
             Assert.Multiple(() =>
@@ -61,7 +61,7 @@ namespace CryptoTransactions.API.Tests
 
             var result = TestController.GetAllFiltered(query, limit, offset);
 
-            var okResult = result as StatusCodeResult;
+            var okResult = result.Result as StatusCodeResult;
 
             Assert.That(okResult.StatusCode, Is.EqualTo(expectedCode));
         }
@@ -85,7 +85,7 @@ namespace CryptoTransactions.API.Tests
             
             var result = TestController.GetTransactionByGUID(transactionGUID);
             
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
             var transaction = statusResult.Value as Transaction;
             
             Assert.Multiple(() =>
@@ -108,7 +108,7 @@ namespace CryptoTransactions.API.Tests
         {
             var result = TestController.GetTransactionByGUID(transactionGUID);
         
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
         
             Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
         }
@@ -147,7 +147,7 @@ namespace CryptoTransactions.API.Tests
 
             using var updatedDBContext = new CryptoTransactionsContext();
 
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
 
             Assert.Multiple(() =>
             {
@@ -194,7 +194,7 @@ namespace CryptoTransactions.API.Tests
 
             var result = TestController.AddNew(transaction);
             
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
             
             using var dbContext = new CryptoTransactionsContext();
             
@@ -213,7 +213,7 @@ namespace CryptoTransactions.API.Tests
         {
             var result = TestController.Delete(transactionGUID);
             
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
             
             using var dbContext = new CryptoTransactionsContext();
             
@@ -231,7 +231,7 @@ namespace CryptoTransactions.API.Tests
         {
             var result = TestController.Delete(transactionGUID);
         
-            var statusResult = result as ObjectResult;
+            var statusResult = result.Result as ObjectResult;
         
             Assert.That(statusResult.StatusCode, Is.EqualTo(expectedCode));
         }
