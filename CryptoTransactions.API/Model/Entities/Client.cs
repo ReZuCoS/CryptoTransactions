@@ -63,7 +63,6 @@ namespace CryptoTransactions.API.Model.Entities
         [JsonIgnore]
         public virtual ICollection<Transaction> ReceivedTransactions { get; private set; }
 
-        [JsonIgnore]
         internal virtual ICollection<Transaction> Transactions =>
             SentTransactions.Union(ReceivedTransactions)
             .OrderBy(t => t.TimeStamp)

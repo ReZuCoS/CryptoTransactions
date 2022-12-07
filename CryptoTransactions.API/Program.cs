@@ -1,4 +1,6 @@
 using CryptoTransactions.API.Model;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace CryptoTransactions.API
 {
@@ -26,7 +28,9 @@ namespace CryptoTransactions.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.ConfigureSwaggerGen(c => {

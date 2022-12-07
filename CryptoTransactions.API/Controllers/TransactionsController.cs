@@ -131,7 +131,7 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.CreatedAtAction(nameof(Delete), transaction);
+            return base.CreatedAtAction(nameof(GetTransactionByGUID), transaction);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.AcceptedAtAction(nameof(Delete), transaction);
+            return base.AcceptedAtAction(nameof(GetTransactionByGUID), transaction);
         }
     }
 }
