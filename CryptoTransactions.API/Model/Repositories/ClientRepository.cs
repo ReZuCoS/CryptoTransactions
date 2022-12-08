@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace CryptoTransactions.API.Model.Repositories
 {
-    public class ClientRepository : IRepository<Client>
+    public class ClientRepository : IRepository<Client, string>, IDisposable
     {
         private readonly CryptoTransactionsContext _context;
 
@@ -14,19 +14,36 @@ namespace CryptoTransactions.API.Model.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Client>> GetAllAsync()
+        public async Task<IEnumerable<Client>> GetAllAsync(Expression<Func<Client, bool>> expression)
         {
-            return await _context.Clients.ToListAsync();
+            return await _context.Clients
+                .Where(expression)
+                .ToListAsync();
         }
 
-        public IEnumerable<Client> GetByConditionAsync(Expression<Func<Client, bool>> expression)
+        public async Task<Client?> GetByKey(string key)
         {
-            return _context.Clients.Where(expression).ToList();
+            return await _context.Clients
+                .FirstOrDefaultAsync(c => c.WalletNumber.Equals(key));
         }
 
-        public void Create(Client client)
+        public async Task<Client?> GetByKeyDetailedAsync(string key)
         {
-            _context.Clients.Add(client);
+            return await _context.Clients
+                .Where(c => c.WalletNumber.Equals(key))
+                .Include(c => c.SentTransactions)
+                .Include(c => c.ReceivedTransactions)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> HasAny(string key)
+        {
+            return await _context.Clients.AnyAsync(c => c.WalletNumber.Equals(key));
+        }
+
+        public async Task CreateAsync(Client client)
+        {
+            await _context.Clients.AddAsync(client);
         }
 
         public void Update(Client client)
@@ -39,7 +56,7 @@ namespace CryptoTransactions.API.Model.Repositories
             _context.Clients.Remove(client);
         }
 
-        public async void SaveAsync()
+        public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
         }
