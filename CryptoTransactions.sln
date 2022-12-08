@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTransactions.API.Tests", "CryptoTransactions.API.Tests\CryptoTransactions.API.Tests.csproj", "{90513666-E330-4FE1-AC2A-2FAFA0336636}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoTransactions.WinClient", "CryptoTransactions.WinClient\CryptoTransactions.WinClient.csproj", "{A0C5D3BA-60CD-4DE8-8FC9-809C8F90598A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{90513666-E330-4FE1-AC2A-2FAFA0336636}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90513666-E330-4FE1-AC2A-2FAFA0336636}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90513666-E330-4FE1-AC2A-2FAFA0336636}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0C5D3BA-60CD-4DE8-8FC9-809C8F90598A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0C5D3BA-60CD-4DE8-8FC9-809C8F90598A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0C5D3BA-60CD-4DE8-8FC9-809C8F90598A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0C5D3BA-60CD-4DE8-8FC9-809C8F90598A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
