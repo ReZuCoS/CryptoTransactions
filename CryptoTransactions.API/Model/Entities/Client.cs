@@ -32,6 +32,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         [Required]
         [MaxLength(50)]
+        [DataType(DataType.Text)]
         public string Surname { get; set; } = default!;
 
         /// <summary>
@@ -39,18 +40,21 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         [Required]
         [MaxLength(50)]
+        [DataType(DataType.Text)]
         public string Name { get; set; } = default!;
 
         /// <summary>
         /// Client's patronymic (if available)
         /// </summary>
         [MaxLength(50)]
+        [DataType(DataType.Text)]
         public string Patronymic { get; set; } = string.Empty;
 
         /// <summary>
         /// Client's balance
         /// </summary>
         [DefaultValue(0.0d)]
+        [DataType(DataType.Currency)]
         public double Balance { get;  private set; }
 
         [JsonIgnore]
@@ -58,18 +62,32 @@ namespace CryptoTransactions.API.Model.Entities
 
         [JsonIgnore]
         public virtual ICollection<Transaction> ReceivedTransactions { get; private set; }
-        
+
+        internal virtual ICollection<Transaction> Transactions =>
+            SentTransactions.Union(ReceivedTransactions)
+            .OrderBy(t => t.TimeStamp)
+            .ToList();
+
         /// <summary>
         /// Generates new GUID for current client
         /// </summary>
         public void GenerateNewWalletNumber() =>
-            WalletNumber = NewId.NextGuid().ToString();
+            WalletNumber = NewId.NextGuid().ToString().ToLower();
+
+        public void ReplenishBalance(double count) =>
+            Balance += count;
+
+        public void DecreaseBalance(double count) =>
+            Balance -= count <= Balance ?
+            count :
+            throw new ArgumentOutOfRangeException(nameof(count),
+                "Value cannot be more than balance");
 
         /// <summary>
         /// Updates client GUID
         /// </summary>
         /// <param name="walletNumber">GUID to update</param>
-        public void UpdateWalletNumber(string walletNumber) =>
+        public void SetWalletNumber(string walletNumber) =>
             this.WalletNumber = walletNumber;
     }
 }

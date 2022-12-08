@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using CryptoTransactions.API.Model.Validators;
+using MassTransit;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -23,12 +24,14 @@ namespace CryptoTransactions.API.Model.Entities
         /// Transaction date and time
         /// </summary>
         [Required]
+        [DataType(DataType.DateTime)]
         public string TimeStamp { get; set; } = default!;
 
         /// <summary>
         /// GUID sender wallet number
         /// </summary>
         [Required]
+        [GuidValue]
         [MinLength(36)]
         [MaxLength(36)]
         public string SenderWallet { get; set; } = default!;
@@ -37,6 +40,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// GUID recipient wallet number
         /// </summary>
         [Required]
+        [GuidValue]
         [MinLength(36)]
         [MaxLength(36)]
         public string RecipientWallet { get; set; } = default!;
@@ -46,6 +50,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         [Required]
         [DefaultValue(0.0d)]
+        [DataType(DataType.Currency)]
         public double Amount { get; set; }
 
         /// <summary>
@@ -62,11 +67,15 @@ namespace CryptoTransactions.API.Model.Entities
         [MaxLength(75)]
         public string TransactionType { get; set; } = default!;
 
-        public virtual Client? Sender { get;  private set; }
+        public virtual Client? Sender { get; private set; }
 
         public virtual Client? Recipient { get; private set; }
 
         public void GenerateNewGUID() =>
-            GUID = NewId.NextGuid().ToString();
+            GUID = NewId.NextGuid().ToString().ToLower();
+
+        public bool IsValid() =>
+            !this.SenderWallet.Equals(this.RecipientWallet) &&
+            this.Amount > 0;
     }
 }

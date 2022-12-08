@@ -1,5 +1,6 @@
 using CryptoTransactions.API.Model;
-using Swashbuckle.AspNetCore.SwaggerUI;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace CryptoTransactions.API
 {
@@ -9,13 +10,13 @@ namespace CryptoTransactions.API
         {
             var app = GenerateApplication(args);
 
+            SetConnectionString(app.Configuration.GetConnectionString("CryptoTransactions"));
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.EnableTryItOutByDefault());
             }
-
-            SetConnectionString(app.Configuration.GetConnectionString("CryptoTransactions"));
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
@@ -27,7 +28,9 @@ namespace CryptoTransactions.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.ConfigureSwaggerGen(c => {
