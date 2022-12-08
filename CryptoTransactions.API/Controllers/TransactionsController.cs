@@ -1,9 +1,10 @@
 ﻿using CryptoTransactions.API.Model;
 using CryptoTransactions.API.Model.Entities;
 using CryptoTransactions.API.Model.Entities.QueryEntities;
+using CryptoTransactions.API.Model.Repositories;
+using CryptoTransactions.API.Model.Repositories.Interfaces;
 using CryptoTransactions.API.Model.Validators;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace CryptoTransactions.API.Controllers
@@ -12,7 +13,12 @@ namespace CryptoTransactions.API.Controllers
     [Route("api/transactions")]
     public sealed class TransactionsController : ControllerBase
     {
-        private readonly CryptoTransactionsContext _databaseContext = new();
+        private readonly IRepository<Transaction, string> _repository;
+
+        public TransactionsController()
+        {
+            _repository = new TransactionRepository(new CryptoTransactionsContext());
+        }
 
         /// <summary>
         /// Returns transactions list
@@ -27,28 +33,20 @@ namespace CryptoTransactions.API.Controllers
         public async Task<IActionResult> GetAllFiltered([FromQuery] TransactionQuery transactionQuery,
             [Range(1, 100)] int limit = 20, [Range(0, int.MaxValue)] int offset = 0)
         {
-            var transactions = await _databaseContext.Transactions
-                .OrderBy(t => t.TimeStamp)
-                .ToListAsync();
-
-            if (!transactionQuery.IsEmpty())
-                transactions = transactions.Where(t =>
+            var transactions = await _repository.GetAllAsync(t =>
                     t.TimeStamp.Contains(transactionQuery.TimeStamp) &&
                     t.SenderWallet.Contains(transactionQuery.SenderWallet) &&
-                    t.RecipientWallet.Contains(transactionQuery.RecipientWallet))
-                    .ToList();
+                    t.RecipientWallet.Contains(transactionQuery.RecipientWallet));
 
             transactions = transactions
                 .Skip(offset)
-                .Take(limit)
-                .ToList();
+                .Take(limit);
 
-            if (!transactions.Any())
-                return base.NoContent();
-
-            return base.Ok(transactions);
+            return transactions.Any() ?
+                base.Ok(transactions) :
+                base.NoContent();
         }
-
+        
         /// <summary>
         /// Returns transaction by GUID
         /// </summary>
@@ -58,16 +56,11 @@ namespace CryptoTransactions.API.Controllers
         [HttpGet("{transactionGUID}", Name = "GetTransactionByGUID")]
         public async Task<IActionResult> GetTransactionByGUID([GuidValue] string transactionGUID)
         {
-            var transaction = await _databaseContext.Transactions
-                .Include(t => t.Sender)
-                .Include(t => t.Recipient)
-                .FirstOrDefaultAsync(t =>
-                t.GUID == transactionGUID);
+            var transaction = await _repository.GetByKeyDetailedAsync(transactionGUID);
 
-            if (transaction is null)
-                return base.NotFound("Transaction not found");
-
-            return base.Ok(transaction);
+            return transaction is not null ?
+                base.Ok(transaction) :
+                base.NotFound("Transaction not found");
         }
 
         /// <summary>
@@ -76,53 +69,29 @@ namespace CryptoTransactions.API.Controllers
         /// <param name="transaction">Transaction data</param>
         /// <response code="201">Successfully created</response>
         /// <response code="400">Request arguments errors</response>
-        /// <response code="404">Clients wallets not found</response>
         /// <response code="409">Creation error. Check and resend data</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AddTransaction")]
         public async Task<IActionResult> AddNew(Transaction transaction)
         {
-            if (transaction.SenderWallet.Equals(transaction.RecipientWallet))
-                return base.BadRequest("Recipient and sender wallets cannot be equal");
+            if (!transaction.IsValid())
+                return base.BadRequest("Check transaction data and try again!");
 
-            if (transaction.Amount <= 0)
-                return base.BadRequest("Transaction amount cannot be lower or equals zero");
-
-            var sender = _databaseContext.Clients.FirstOrDefault(c =>
-                c.WalletNumber == transaction.SenderWallet);
-            var recipient = _databaseContext.Clients.FirstOrDefault(c =>
-                c.WalletNumber == transaction.RecipientWallet);
-
-            if (sender is null)
-                return base.NotFound("Sender wallet not found");
-
-            if (recipient is null)
-                return base.NotFound("Recipient wallet not found");
-
-            if (_databaseContext.Transactions.Any(t => t.GUID == transaction.GUID))
+            if (await _repository.HasAny(transaction.GUID))
                 return base.Conflict("Transaction GUID alredy exists. Try to resend data");
-
-            if (_databaseContext.Transactions.Any(t =>
-                t.TimeStamp == transaction.TimeStamp &&
-                t.SenderWallet == transaction.SenderWallet &&
-                t.RecipientWallet == transaction.RecipientWallet))
-                return base.Conflict("Transaction alredy exists");
 
             try
             {
-                await _databaseContext.Transactions.AddAsync(transaction);
-
-                sender.DecreaseBalance(transaction.Amount);
-                _databaseContext.Clients.Update(sender);
-
-                recipient.ReplenishBalance(transaction.Amount);
-                _databaseContext.Clients.Update(recipient);
-                
-                await _databaseContext.SaveChangesAsync();
+                await _repository.CreateAsync(transaction);
+                await _repository.SaveAsync();
             }
             catch (ArgumentOutOfRangeException)
             {
                 return base.BadRequest("Sender balance lower than transaction amount!");
+            }
+            catch (ArgumentException ex)
+            {
+                return base.BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -131,7 +100,8 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.CreatedAtAction(nameof(GetTransactionByGUID), transaction);
+            return base.CreatedAtAction(nameof(GetTransactionByGUID),
+                new { transaction.GUID }, transaction);
         }
 
         /// <summary>
@@ -144,16 +114,15 @@ namespace CryptoTransactions.API.Controllers
         [HttpDelete("{transactionGUID}", Name = "DeleteTransaction")]
         public async Task<IActionResult> Delete([GuidValue] string transactionGUID)
         {
-            var transaction = await _databaseContext.Transactions
-                .FirstOrDefaultAsync(t => t.GUID == transactionGUID);
+            var transaction = await _repository.GetByKey(transactionGUID);
 
             if (transaction is null)
                 return base.NotFound("Transaction not found");
 
             try
             {
-                _databaseContext.Transactions.Remove(transaction);
-                await _databaseContext.SaveChangesAsync();
+                _repository.Delete(transaction);
+                await _repository.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -162,7 +131,8 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.AcceptedAtAction(nameof(GetTransactionByGUID), transaction);
+            return base.AcceptedAtAction(nameof(GetTransactionByGUID),
+                new { transaction.GUID }, transaction);
         }
     }
 }

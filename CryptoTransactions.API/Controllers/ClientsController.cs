@@ -1,14 +1,12 @@
-﻿using CryptoTransactions.API.Model.Entities;
+﻿using CryptoTransactions.API.Model;
+using CryptoTransactions.API.Model.Entities;
 using CryptoTransactions.API.Model.Entities.QueryEntities;
-using CryptoTransactions.API.Model;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using CryptoTransactions.API.Model.Validators;
-using CryptoTransactions.API.Model.Repositories.Interfaces;
 using CryptoTransactions.API.Model.Repositories;
-using System.Globalization;
-using System.Linq;
+using CryptoTransactions.API.Model.Repositories.Interfaces;
+using CryptoTransactions.API.Model.Validators;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace CryptoTransactions.API.Controllers
 {
@@ -16,11 +14,11 @@ namespace CryptoTransactions.API.Controllers
     [Route("api/clients")]
     public sealed class ClientsController : ControllerBase
     {
-        private readonly IRepository<Client> _clientRepository;
+        private readonly IRepository<Client, string> _repository;
 
         public ClientsController()
         {
-            _clientRepository = new ClientRepository(new CryptoTransactionsContext());
+            _repository = new ClientRepository(new CryptoTransactionsContext());
         }
 
         /// <summary>
@@ -36,100 +34,86 @@ namespace CryptoTransactions.API.Controllers
         public async Task<IActionResult> GetAllFiltered([FromQuery] ClientQuery clientQuery, [Range(1, 100)] int limit = 20,
             [Range(0, int.MaxValue)] int offset = 0)
         {
-            IEnumerable<Client> clients;
-
-            if (clientQuery.IsEmpty())
-                clients = await _clientRepository.GetAllAsync();
-            else
-                clients = new CryptoTransactionsContext().Clients.Where(c =>
-                    c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()));
-                    //c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()) &&
-                    //c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
-                    //c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower()));
-            
+            var clients = await _repository.GetAllAsync(c =>
+                c.Surname.ToLower().Contains(clientQuery.Surname.ToLower()) &&
+                c.Name.ToLower().Contains(clientQuery.Name.ToLower()) &&
+                c.Patronymic.ToLower().Contains(clientQuery.Patronymic.ToLower()));
+                
             clients = clients
                 .Skip(offset)
-                .Take(limit)
-                .ToList();
+                .Take(limit);
 
-            if (!clients.Any())
-                return base.NoContent();
-            
-            return base.Ok(clients);
+            return clients.Any() ?
+                base.Ok(clients) :
+                base.NoContent();
         }
 
-        ///// <summary>
-        ///// Returns client by wallet number
-        ///// </summary>
-        ///// <param name="walletNumber">Wallet number (GUID)</param>
-        ///// <response code="200">Successfully returned client</response>
-        ///// <response code="404">Wallet number doesn't match GUID standart</response>
-        //[HttpGet("{walletNumber}", Name = "GetClientByWalletNumber")]
-        //public async Task<IActionResult> GetClientByWalletNumber([GuidValue] string walletNumber)
-        //{
-        //    var client = await _databaseContext.Clients
-        //        .FirstOrDefaultAsync(c => c.WalletNumber == walletNumber);
-        //
-        //    if (client is null)
-        //        return base.NotFound("Client not found");
-        //
-        //    return base.Ok(client);
-        //}
-        //
-        ///// <summary>
-        ///// Returns client transactions by wallet number
-        ///// </summary>
-        ///// <param name="walletNumber">Wallet number (GUID)</param>
-        ///// <param name="limit">Count of returned results (1 - 100)</param>
-        ///// <param name="offset">ID offset (starts from 0)</param>
-        ///// <response code="200">Successfully returned transactions</response>
-        ///// <response code="204">Client's transactions count equals zero</response>
-        ///// <response code="404">Wallet number doesn't match GUID standart</response>
-        //[HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
-        //public async Task<IActionResult> GetClientTransactions([GuidValue] string walletNumber, [Range(1, 100)] int limit = 20,
-        //    [Range(0, int.MaxValue)] int offset = 0)
-        //{
-        //    var transactions = await _databaseContext.Transactions
-        //        .Where(t => t.SenderWallet == walletNumber || t.RecipientWallet == walletNumber)
-        //        .Include(t => t.Sender)
-        //        .Include(t => t.Recipient)
-        //        .Skip(offset)
-        //        .Take(limit)
-        //        .ToListAsync();
-        //    
-        //    if (!transactions.Any())
-        //        return base.NoContent();
-        //
-        //    return base.Ok(transactions);
-        //}
-        //
-        ///// <summary>
-        ///// Returns client transactions by wallet number
-        ///// </summary>
-        ///// <param name="walletNumber">Wallet number (GUID)</param>
-        ///// <param name="transactionGUID">Transaction key (GUID)</param>
-        ///// <response code="200">Successfully returned transactions</response>
-        ///// <response code="404">Wallet number doesn't match GUID standart</response>
-        //[HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
-        //public async Task<IActionResult> GetClientTransactionByKey([GuidValue] string walletNumber,
-        //    [GuidValue] string transactionGUID)
-        //{
-        //    var client = await _databaseContext.Clients
-        //        .Include(c => c.SentTransactions)
-        //        .Include(c => c.ReceivedTransactions)
-        //        .FirstOrDefaultAsync(c => c.WalletNumber.Equals(walletNumber));
-        //        
-        //    if (client is null)
-        //        return base.NotFound("Client not found");
-        //
-        //    var transaction = client.Transactions
-        //        .FirstOrDefault(t => t.GUID.Equals(transactionGUID));
-        //
-        //    if (transaction is null)
-        //        return base.NotFound("Client transaction not found");
-        //
-        //    return base.LocalRedirect($"~/api/transactions/{transaction.GUID}");
-        //}
+        /// <summary>
+        /// Returns client by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <response code="200">Successfully returned client</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
+        [HttpGet("{walletNumber}", Name = "GetClientByWalletNumber")]
+        public async Task<IActionResult> GetClientByWalletNumber([GuidValue] string walletNumber)
+        {
+            var client = await _repository.GetByKeyDetailedAsync(walletNumber);
+
+            return client is not null ?
+                base.Ok(client) :
+                base.NotFound("Client not found");
+        }
+
+        /// <summary>
+        /// Returns client transactions by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <param name="limit">Count of returned results (1 - 100)</param>
+        /// <param name="offset">ID offset (starts from 0)</param>
+        /// <response code="200">Successfully returned transactions</response>
+        /// <response code="204">Client's transactions count equals zero</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
+        [HttpGet("{walletNumber}/transactions", Name = "GetClientTransactions")]
+        public async Task<IActionResult> GetClientTransactions([GuidValue] string walletNumber, [Range(1, 100)] int limit = 20,
+            [Range(0, int.MaxValue)] int offset = 0)
+        {
+            var clientDetailed = await _repository.GetByKeyDetailedAsync(walletNumber);
+
+            if (clientDetailed is null)
+                return base.NotFound("Client not found!");
+
+            var transactions = clientDetailed.Transactions
+                .Skip(offset)
+                .Take(limit);
+
+            return clientDetailed.Transactions.Any() ?
+                base.Ok(transactions) :
+                base.NoContent();
+        }
+
+        /// <summary>
+        /// Returns client transactions by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <param name="transactionGUID">Transaction key (GUID)</param>
+        /// <response code="200">Successfully returned transactions</response>
+        /// <response code="404">Wallet number doesn't match GUID standart</response>
+        [HttpGet("{walletNumber}/transactions/{transactionGUID}", Name = "GetClientTransactionByKey")]
+        public async Task<IActionResult> GetClientTransactionByKey([GuidValue] string walletNumber,
+            [GuidValue] string transactionGUID)
+        {
+            var clientDetailed = await _repository.GetByKeyDetailedAsync(walletNumber);
+
+            if (clientDetailed is null)
+                return base.NotFound("Client not found!");
+
+            var transaction = clientDetailed.Transactions
+                .FirstOrDefault(t => t.GUID.Equals(transactionGUID));
+
+            return transaction is not null ? 
+                base.LocalRedirect($"~/api/transactions/{transaction.GUID}") :
+                base.NotFound("Client transaction not found");
+        }
 
         /// <summary>
         /// Adds new client in database
@@ -141,15 +125,13 @@ namespace CryptoTransactions.API.Controllers
         [HttpPost(Name = "AddClient")]
         public async Task<IActionResult> AddNew(Client client)
         {
-            var _databaseContext = new CryptoTransactionsContext();
-
-            if (_databaseContext.Clients.Any(c => c.WalletNumber == client.WalletNumber))
+            if (await _repository.HasAny(client.WalletNumber))
                 return base.Conflict("Wallet number alredy exists. Try to resend data");
 
             try
             {
-                await _databaseContext.Clients.AddAsync(client);
-                await _databaseContext.SaveChangesAsync();
+                await _repository.CreateAsync(client);
+                await _repository.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -158,82 +140,81 @@ namespace CryptoTransactions.API.Controllers
                     $"Error message: {ex.Message}");
             }
 
-            return base.Created("", client/*AtAction(nameof(GetClientByWalletNumber),
-                new { client.WalletNumber }, client*/);
+            return base.CreatedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
         }
 
-        ///// <summary>
-        ///// Deletes client by wallet number
-        ///// </summary>
-        ///// <param name="walletNumber">Wallet number (GUID)</param>
-        ///// <response code="200">Success</response>
-        ///// <response code="202">Client removed</response>
-        ///// <response code="404">Sended value doest match GUID standart</response>
-        ///// <response code="409">Client has one or more transactions</response>
-        ///// <response code="500">Internal server error</response>
-        //[HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
-        //public async Task<IActionResult> Delete([GuidValue] string walletNumber)
-        //{
-        //    var client = await _databaseContext.Clients
-        //        .FirstOrDefaultAsync(c => c.WalletNumber == walletNumber);
-        //
-        //    if (client is null)
-        //        return base.NotFound("Client not found");
-        //
-        //    try
-        //    {
-        //        _databaseContext.Clients.Remove(client);
-        //        await _databaseContext.SaveChangesAsync();
-        //    }
-        //    catch(DbUpdateException ex)
-        //    {
-        //        return base.Conflict("An error occurred while deleting " +
-        //            "a client from the database. You cannot remove client, " +
-        //            "which has one or more transactions" +
-        //            $"Error message: {ex.Message}");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return base.StatusCode(500, "An error ocurred when saving database. " +
-        //            "Check client wallet number and try again.\n" +
-        //            $"Error message: {ex.Message}");
-        //    }
-        //
-        //    return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
-        //        new { client.WalletNumber }, client);
-        //}
-        //
-        ///// <summary>
-        ///// Updates client data
-        ///// </summary>
-        ///// <param name="walletNumber">Client wallet number which is going to update (GUID)</param>
-        ///// <param name="client">Client data</param>
-        ///// <response code="200">Success</response>
-        ///// <response code="202">Client updated</response>
-        ///// <response code="404">Sended value doesn't match GUID standart</response>
-        ///// <response code="500">Internal server error</response>
-        //[HttpPut("{walletNumber}", Name = "UpdateClient")]
-        //public async Task<IActionResult> Update([GuidValue] string walletNumber, Client client)
-        //{
-        //    if (!_databaseContext.Clients.Any(c => c.WalletNumber.Equals(walletNumber)))
-        //        return base.NotFound("Client not found");
-        //
-        //    client.SetWalletNumber(walletNumber);
-        //
-        //    try
-        //    {
-        //        _databaseContext.Clients.Update(client);
-        //        await _databaseContext.SaveChangesAsync();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return base.StatusCode(500, "An error ocurred when saving database. " +
-        //            "Check client data and try again.\n" +
-        //            $"Error message: {ex.Message}");
-        //    }
-        //
-        //    return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
-        //        new { client.WalletNumber }, client);
-        //}
+        /// <summary>
+        /// Deletes client by wallet number
+        /// </summary>
+        /// <param name="walletNumber">Wallet number (GUID)</param>
+        /// <response code="200">Success</response>
+        /// <response code="202">Client removed</response>
+        /// <response code="404">Sended value doest match GUID standart</response>
+        /// <response code="409">Client has one or more transactions</response>
+        /// <response code="500">Internal server error</response>
+        [HttpDelete("{walletNumber}", Name = "DeleteClientByWalletNumber")]
+        public async Task<IActionResult> Delete([GuidValue] string walletNumber)
+        {
+            var client = await _repository.GetByKey(walletNumber);
+
+            if (client is null)
+                return base.NotFound("Client not found");
+
+            try
+            {
+                _repository.Delete(client);
+                await _repository.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return base.Conflict("An error occurred while deleting " +
+                    "a client from the database. You cannot remove client, " +
+                    "which has one or more transactions" +
+                    $"Error message: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check client wallet number and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
+
+            return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
+        }
+
+        /// <summary>
+        /// Updates client data
+        /// </summary>
+        /// <param name="walletNumber">Client wallet number which is going to update (GUID)</param>
+        /// <param name="client">Client data</param>
+        /// <response code="200">Success</response>
+        /// <response code="202">Client updated</response>
+        /// <response code="404">Sended value doesn't match GUID standart</response>
+        /// <response code="500">Internal server error</response>
+        [HttpPut("{walletNumber}", Name = "UpdateClient")]
+        public async Task<IActionResult> Update([GuidValue] string walletNumber, Client client)
+        {
+            if (!await _repository.HasAny(walletNumber))
+                return base.NotFound("Client not found");
+
+            client.SetWalletNumber(walletNumber);
+
+            try
+            {
+                _repository.Update(client);
+                await _repository.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                return base.StatusCode(500, "An error ocurred when saving database. " +
+                    "Check client data and try again.\n" +
+                    $"Error message: {ex.Message}");
+            }
+
+            return base.AcceptedAtAction(nameof(GetClientByWalletNumber),
+                new { client.WalletNumber }, client);
+        }
     }
 }
