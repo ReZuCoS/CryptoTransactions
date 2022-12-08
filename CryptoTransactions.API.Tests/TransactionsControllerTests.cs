@@ -171,13 +171,10 @@ namespace CryptoTransactions.API.Tests
             "d2630000-5d0f-0015-2872-08da3058ad5a", 0d, "Bitcoin", "Transaction")]
         [TestCase(400, "d0630000-5d0f-0015-2872-08da3058ad5a",
             "d1630000-5d0f-0015-2872-08da3058ad5a", 500.0d, "Bitcoin", "Transaction")]
-        [TestCase(404, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a",
+        [TestCase(400, "aaaaaaaa-5d0f-0015-2872-08da3058ad5a",
             "d2630000-5d0f-0015-2872-08da3058ad5a", 5.0d, "Bitcoin", "Transaction")]
-        [TestCase(404, "d2630000-5d0f-0015-2872-08da3058ad5a",
+        [TestCase(400, "d2630000-5d0f-0015-2872-08da3058ad5a",
             "aaaaaaaa-5d0f-0015-2872-08da3058ad5a", 5.0d, "Bitcoin", "Transaction")]
-        [TestCase(409, "d0630000-5d0f-0015-2872-08da3058ad5a",
-            "d1630000-5d0f-0015-2872-08da3058ad5a", 5.0d, "Bitcoin", "Transaction",
-            "02.12.2022 16:25:35")]
         public void AddNewClient_Negative(int expectedCode,
             string senderWallet, string recipientWallet, double amount,
             string currencyType, string transactionType, string? timestamp = null)
