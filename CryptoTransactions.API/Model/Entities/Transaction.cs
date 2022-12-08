@@ -73,5 +73,9 @@ namespace CryptoTransactions.API.Model.Entities
 
         public void GenerateNewGUID() =>
             GUID = NewId.NextGuid().ToString().ToLower();
+
+        public bool IsValid() =>
+            !this.SenderWallet.Equals(this.RecipientWallet) &&
+            this.Amount > 0;
     }
 }
