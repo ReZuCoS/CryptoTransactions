@@ -57,7 +57,7 @@ namespace CryptoTransactions.API.Controllers
         [HttpGet("{walletNumber}", Name = "GetClientByWalletNumber")]
         public async Task<IActionResult> GetClientByWalletNumber([GuidValue] string walletNumber)
         {
-            var client = await _repository.GetByKeyDetailedAsync(walletNumber);
+            var client = await _repository.Find(walletNumber);
 
             return client is not null ?
                 base.Ok(client) :
@@ -77,7 +77,7 @@ namespace CryptoTransactions.API.Controllers
         public async Task<IActionResult> GetClientTransactions([GuidValue] string walletNumber, [Range(1, 100)] int limit = 20,
             [Range(0, int.MaxValue)] int offset = 0)
         {
-            var clientDetailed = await _repository.GetByKeyDetailedAsync(walletNumber);
+            var clientDetailed = await _repository.Find(walletNumber);
 
             if (clientDetailed is null)
                 return base.NotFound("Client not found!");
@@ -102,7 +102,7 @@ namespace CryptoTransactions.API.Controllers
         public async Task<IActionResult> GetClientTransactionByKey([GuidValue] string walletNumber,
             [GuidValue] string transactionGUID)
         {
-            var clientDetailed = await _repository.GetByKeyDetailedAsync(walletNumber);
+            var clientDetailed = await _repository.Find(walletNumber);
 
             if (clientDetailed is null)
                 return base.NotFound("Client not found!");

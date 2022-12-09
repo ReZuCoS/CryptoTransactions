@@ -27,7 +27,7 @@ namespace CryptoTransactions.API.Model.Repositories
                 .FirstOrDefaultAsync(c => c.WalletNumber.Equals(key));
         }
 
-        public async Task<Client?> GetByKeyDetailedAsync(string key)
+        public async Task<Client?> Find(string key)
         {
             return await _context.Clients
                 .Where(c => c.WalletNumber.Equals(key))

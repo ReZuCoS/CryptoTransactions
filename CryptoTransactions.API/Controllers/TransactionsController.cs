@@ -56,7 +56,7 @@ namespace CryptoTransactions.API.Controllers
         [HttpGet("{transactionGUID}", Name = "GetTransactionByGUID")]
         public async Task<IActionResult> GetTransactionByGUID([GuidValue] string transactionGUID)
         {
-            var transaction = await _repository.GetByKeyDetailedAsync(transactionGUID);
+            var transaction = await _repository.Find(transactionGUID);
 
             return transaction is not null ?
                 base.Ok(transaction) :

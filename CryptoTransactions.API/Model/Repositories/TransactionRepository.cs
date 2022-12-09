@@ -27,7 +27,7 @@ namespace CryptoTransactions.API.Model.Repositories
                 .FirstOrDefaultAsync(c => c.GUID.Equals(key));
         }
 
-        public async Task<Transaction?> GetByKeyDetailedAsync(string key)
+        public async Task<Transaction?> Find(string key)
         {
             return await _context.Transactions
                 .Where(t => t.GUID.Equals(key))
