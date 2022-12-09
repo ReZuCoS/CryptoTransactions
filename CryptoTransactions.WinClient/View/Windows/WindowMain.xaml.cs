@@ -5,18 +5,21 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace CryptoTransactions.WinClient.View.Windows
 {
     public partial class WindowMain : Window
     {
-        private readonly Uri _apiUri = new("https://localhost:7002");
-
+        private static readonly HttpClient Client = new()
+        {
+            BaseAddress = new Uri("https://localhost:7002"),
+            Timeout = TimeSpan.FromMinutes(3)
+        };
 
         public WindowMain()
         {
             InitializeComponent();
-            
         }
 
         private async void LoadClientsTable(object sender, RoutedEventArgs e)
@@ -25,25 +28,20 @@ namespace CryptoTransactions.WinClient.View.Windows
             {
                 listViewClients.ItemsSource = await GetClients();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show("При выполнении программы произошла ошибка:\n" + ex.ToString(),
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async Task<IEnumerable<Client>> GetClients()
         {
-            using var httpClient = new HttpClient()
-            {
-                BaseAddress = _apiUri,
-                Timeout = TimeSpan.FromMinutes(3)
-            };
+            var response = await Client.GetAsync("/api/clients");
 
-            var response = await httpClient.GetAsync("/api/clients");
-
-            response.EnsureSuccessStatusCode();
-
-            string content = await response.Content.ReadAsStringAsync();
+            string content = await response
+                .EnsureSuccessStatusCode()
+                .Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<List<Client>>(content);
         }
