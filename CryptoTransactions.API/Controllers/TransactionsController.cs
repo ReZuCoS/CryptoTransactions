@@ -101,7 +101,7 @@ namespace CryptoTransactions.API.Controllers
             }
 
             return base.CreatedAtAction(nameof(GetTransactionByGUID),
-                new { transaction.GUID }, transaction);
+                new { transactionGUID = transaction.GUID }, transaction);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace CryptoTransactions.API.Controllers
             }
 
             return base.AcceptedAtAction(nameof(GetTransactionByGUID),
-                new { transaction.GUID }, transaction);
+                new { transactionGUID = transaction.GUID }, transaction);
         }
     }
 }
