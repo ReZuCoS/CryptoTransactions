@@ -53,10 +53,9 @@ namespace CryptoTransactions.API.Model.Repositories
             if (recipient is null)
                 throw new ArgumentException("Recipient wallet not found!");
 
-            sender.DecreaseBalance(transaction.Amount);
+            sender.TransferTo(recipient, transaction.Amount);
+            
             _context.Entry(sender).State = EntityState.Modified;
-
-            recipient.ReplenishBalance(transaction.Amount);
             _context.Entry(recipient).State = EntityState.Modified;
 
             _context.Transactions.Add(transaction);
