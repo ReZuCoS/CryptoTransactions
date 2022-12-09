@@ -55,7 +55,7 @@ namespace CryptoTransactions.API.Model.Entities
         /// </summary>
         [DefaultValue(0.0d)]
         [DataType(DataType.Currency)]
-        public double Balance { get;  private set; }
+        public double Balance { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Transaction> SentTransactions { get; private set; }
@@ -74,14 +74,14 @@ namespace CryptoTransactions.API.Model.Entities
         public void GenerateNewWalletNumber() =>
             WalletNumber = NewId.NextGuid().ToString().ToLower();
 
-        public void ReplenishBalance(double count) =>
-            Balance += count;
-
-        public void DecreaseBalance(double count) =>
-            Balance -= count <= Balance ?
-            count :
-            throw new ArgumentOutOfRangeException(nameof(count),
+        public void TransferTo(Client client, double amount)
+        {
+            Balance -= amount <= Balance ? amount :
+            throw new ArgumentOutOfRangeException(nameof(amount),
                 "Value cannot be more than balance");
+
+            client.Balance += amount;
+        }
 
         /// <summary>
         /// Updates client GUID
