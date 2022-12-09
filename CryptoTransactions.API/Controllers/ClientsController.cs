@@ -30,7 +30,7 @@ namespace CryptoTransactions.API.Controllers
         /// <response code="200">Successfully returned list</response>
         /// <response code="204">Clients count equals zero</response>
         /// <response code="400">Limit must be lower than 100 and greather than 0</response>
-        [HttpGet(Name = "GetClientsListWithFilter")]
+        [HttpGet(Name = "GetClientsListFiltered")]
         public async Task<IActionResult> GetAllFiltered([FromQuery] ClientQuery clientQuery, [Range(1, 100)] int limit = 20,
             [Range(0, int.MaxValue)] int offset = 0)
         {
