@@ -4,51 +4,67 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CryptoTransactions.WinClient.View.Windows"
+        xmlns:converters="clr-namespace:CryptoTransactions.WinClient.Model.Converters"
         mc:Ignorable="d"
         Title="Crypto transactions"
         Height="450"
+        MinHeight="400"
+        MinWidth="725"
         Width="800">
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="175"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Background="LightGray"
               Grid.Column="1">
-            <!--<ListView x:Name="listViewClients"
+            <Label Content="выберите таблицу"
+                   Foreground="Gray"
+                   HorizontalAlignment="Center"
+                   Opacity="0.75"
+                   FontSize="30"/>
+
+            <ListView x:Name="listViewMain"
                       Background="#DCECFF"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      Padding="5"
+                      ScrollViewer.CanContentScroll="False">
+                <ListView.Resources>
+                    <converters:MultiBooleanConverter x:Key="MultiBooleanConverter"/>
+                </ListView.Resources>
+                
                 <ListView.Style>
                     <Style TargetType="ListView">
                         <Setter Property="Visibility" Value="Hidden"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding
-                                            ElementName=btnClients,
-                                            Path=IsFocused}"
-                                         Value="True">
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource MultiBooleanConverter}">
+                                        <Binding ElementName="btnClients"
+                                                 Path="IsFocused"/>
+                                        
+                                        <Binding ElementName="btnTransactions"
+                                                 Path="IsFocused"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+
                                 <Setter Property="Visibility" Value="Visible"/>
                             </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.Style>
-            </ListView>-->
 
-            <DataGrid Name="listViewClients"/>
-
-            <ListView x:Name="listViewTransactions"
-                      Background="#DCECFF"
-                      BorderThickness="0">
-                <ListView.Style>
-                    <Style TargetType="ListView">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding
-                                            ElementName=btnTransactions,
+                            <DataTrigger Binding="{Binding ElementName=btnClients,
                                             Path=IsFocused}"
                                          Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="ItemTemplate"
+                                        Value="{StaticResource clientsDataTemplate}"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding ElementName=btnTransactions,
+                                            Path=IsFocused}"
+                                         Value="True">
+                                <Setter Property="ItemTemplate"
+                                        Value="{StaticResource clientsDataTemplate}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -60,21 +76,23 @@
                 BorderBrush="LightGray"
                 Background="#B5D7FF"
                 Grid.Column="0">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="25"
-                                      Opacity="0.1"
-                                      ShadowDepth="5"
-                                      Direction="0"/>
-                </Border.Effect>
-            
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="25"
+                                  Opacity="0.1"
+                                  ShadowDepth="5"
+                                  Direction="0"/>
+            </Border.Effect>
+
             <StackPanel FocusManager.IsFocusScope="True">
                 <Button x:Name="btnClients"
+                        Click="LoadClientsTable"
                         Content="Клиенты"
-                        Style="{StaticResource SideMenuButton}"
-                        Click="LoadClientsTable"/>
+                        Height="45"
+                        Style="{StaticResource SideMenuButton}"/>
 
                 <Button x:Name="btnTransactions"
                         Content="Транзакции"
+                        Height="45"
                         Style="{StaticResource SideMenuButton}"/>
             </StackPanel>
         </Border>
