@@ -1,4 +1,4 @@
-﻿namespace CryptoTransactions.WinClient.Model
+﻿namespace CryptoTransactions.WinClient.Model.Entities
 {
     public class Transaction
     {
