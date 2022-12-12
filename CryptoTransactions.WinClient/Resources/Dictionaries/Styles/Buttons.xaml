@@ -3,7 +3,6 @@
 
     <Style TargetType="Button">
         <Setter Property="FontFamily" Value="Arial"/>
-        <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="20"/>
     </Style>
     
