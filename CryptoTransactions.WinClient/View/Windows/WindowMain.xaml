@@ -30,7 +30,8 @@
                       Background="#DCECFF"
                       BorderThickness="0"
                       Padding="5"
-                      ScrollViewer.CanContentScroll="False">
+                      ScrollViewer.CanContentScroll="False"
+                      MouseDoubleClick="listViewMain_MouseDoubleClick">
                 <ListView.Resources>
                     <converters:MultiBooleanConverter x:Key="MultiBooleanConverter"/>
                 </ListView.Resources>
@@ -64,7 +65,7 @@
                                             Path=IsFocused}"
                                          Value="True">
                                 <Setter Property="ItemTemplate"
-                                        Value="{StaticResource clientsDataTemplate}"/>
+                                        Value="{StaticResource transactionsDataTemplate}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -92,6 +93,7 @@
 
                 <Button x:Name="btnTransactions"
                         Content="Транзакции"
+                        Click="LoadTransactionsTable"
                         Height="45"
                         Style="{StaticResource SideMenuButton}"/>
             </StackPanel>
