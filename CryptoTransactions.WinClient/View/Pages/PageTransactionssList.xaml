@@ -1,0 +1,18 @@
+﻿<Page x:Class="CryptoTransactions.WinClient.View.Pages.PageTransactionsList"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:CryptoTransactions.WinClient.View.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450"
+      d:DesignWidth="800"
+      x:Name="clientsPage">
+
+    <ListView x:Name="listViewMain"
+              Background="#DCECFF"
+              BorderThickness="0"
+              Padding="5"
+              ScrollViewer.CanContentScroll="False"
+              ItemTemplate="{StaticResource transactionsDataTemplate}"/>
+</Page>
