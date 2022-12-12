@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Clients data template -->
     <DataTemplate x:Key="clientsDataTemplate">
         <Grid>
             <StackPanel>
@@ -51,6 +52,81 @@
                                             StringFormat={}{0:F2}}"/>
                         </Label.Content>
                     </Label>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Transactions data template -->
+    <DataTemplate x:Key="transactionsDataTemplate">
+        <Grid>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Time:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding DateTimeStamp}"
+                           ContentStringFormat="dd.MM.yyyy - HH:mm:ss:fff"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Transaction ID:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding GUID}"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Sender wallet:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding SenderWallet}"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Recipient wallet:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding RecipientWallet}"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Amount:"
+                           FontWeight="Bold"/>
+
+                    <Label Margin="-8 0"
+                           FontStyle="Oblique">
+                        <Label.Content>
+                            <TextBlock Text="{Binding Amount,
+                                            StringFormat={}{0:F2}}"/>
+                        </Label.Content>
+                    </Label>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Currency type:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding CurrencyType}"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Transaction type:"
+                           FontWeight="Bold"/>
+
+                    <Label Content="{Binding TransactionType}"
+                           Margin="-8 0"
+                           FontStyle="Oblique"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
