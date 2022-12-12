@@ -1,4 +1,6 @@
-﻿namespace CryptoTransactions.WinClient.Model.Entities
+﻿using System;
+
+namespace CryptoTransactions.WinClient.Model.Entities
 {
     public class Transaction
     {
@@ -12,5 +14,7 @@
         public string TransactionType { get; set; }
         public virtual Client Sender { get; set; }
         public virtual Client Recipient { get; set; }
+        public DateTime DateTimeStamp =>
+            DateTime.Parse(TimeStamp);
     }
 }
