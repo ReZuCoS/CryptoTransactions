@@ -1,21 +1,24 @@
 ﻿using CryptoTransactions.WinClient.Model;
 using CryptoTransactions.WinClient.Model.Entities;
+using CryptoTransactions.WinClient.View.Windows.EntityEditors;
 using System;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CryptoTransactions.WinClient.View.Pages
 {
     public partial class PageClientsList : Page
     {
-        public PageClientsList()
-        {
+        public PageClientsList() =>
             InitializeComponent();
 
+        private async void LoadClientsList(object sender, RoutedEventArgs e)
+        {
             try
             {
-                LoadClientsList();
+                listViewMain.ItemsSource = await WebApi.GetAll<Client>("clients");
             }
             catch (HttpRequestException)
             {
@@ -29,9 +32,15 @@ namespace CryptoTransactions.WinClient.View.Pages
             }
         }
 
-        private async void LoadClientsList()
+        private void EditSelectedClient(object sender, MouseButtonEventArgs e)
         {
-            listViewMain.ItemsSource = await WebApi.GetAll<Client>("/api/clients");
+            var selectedClient = (Client)listViewMain.SelectedItem;
+
+            var isSuccess = new WindowClientEditor(selectedClient)
+                .ShowDialog();
+
+            if (isSuccess.Value)
+                LoadClientsList(default, default);
         }
     }
 }

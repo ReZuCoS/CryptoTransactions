@@ -4,18 +4,20 @@ using System;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CryptoTransactions.WinClient.View.Pages
 {
     public partial class PageTransactionsList : Page
     {
-        public PageTransactionsList()
-        {
+        public PageTransactionsList() =>
             InitializeComponent();
 
+        private async void LoadTransactionsList(object sender, RoutedEventArgs e)
+        {
             try
             {
-                LoadTransactionsList();
+                listViewMain.ItemsSource = await WebApi.GetAll<Transaction>("/api/transactions");
             }
             catch (HttpRequestException)
             {
@@ -29,9 +31,11 @@ namespace CryptoTransactions.WinClient.View.Pages
             }
         }
 
-        private async void LoadTransactionsList()
+        private void EditSelectedTransaction(object sender, MouseButtonEventArgs e)
         {
-            listViewMain.ItemsSource = await WebApi.GetAll<Transaction>("/api/transactions");
+            var transaction = (Transaction)listViewMain.SelectedItem;
+
+
         }
     }
 }

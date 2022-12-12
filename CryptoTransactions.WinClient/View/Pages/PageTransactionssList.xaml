@@ -7,12 +7,27 @@
       mc:Ignorable="d" 
       d:DesignHeight="450"
       d:DesignWidth="800"
-      x:Name="clientsPage">
+      Loaded="LoadTransactionsList">
 
     <ListView x:Name="listViewMain"
               Background="#DCECFF"
               BorderThickness="0"
               Padding="5"
               ScrollViewer.CanContentScroll="False"
-              ItemTemplate="{StaticResource transactionsDataTemplate}"/>
+              ItemTemplate="{StaticResource transactionsDataTemplate}">
+        <ListView.ItemContainerStyle>
+            <Style TargetType="{x:Type ListViewItem}">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver"
+                             Value="True">
+                        <Setter Property="IsSelected"
+                                Value="True"/>
+                    </Trigger>
+                </Style.Triggers>
+
+                <EventSetter Event="MouseDoubleClick"
+                             Handler="EditSelectedTransaction"/>
+            </Style>
+        </ListView.ItemContainerStyle>
+    </ListView>
 </Page>
