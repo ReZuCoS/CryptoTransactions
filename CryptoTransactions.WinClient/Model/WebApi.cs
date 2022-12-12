@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace CryptoTransactions.WinClient.Model
 {
@@ -10,7 +11,7 @@ namespace CryptoTransactions.WinClient.Model
     {
         private static readonly HttpClient _httpClient = new()
         {
-            BaseAddress = new Uri("https://localhost:7002"),
+            BaseAddress = new Uri("https://localhost:7002/api/"),
             Timeout = TimeSpan.FromMinutes(3)
         };
 
@@ -26,6 +27,14 @@ namespace CryptoTransactions.WinClient.Model
         {
             var response = await _httpClient.GetAsync(uri);
             return JsonConvert.DeserializeObject<T>(await GetResponseContent(response));
+        }
+
+        public async static Task<HttpResponseMessage> Update(string uri, object entity)
+        {
+            var json = JsonConvert.SerializeObject(entity, Formatting.Indented);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            return await _httpClient.PutAsync(uri, data);
         }
 
         private async static Task<string> GetResponseContent(HttpResponseMessage response) =>
