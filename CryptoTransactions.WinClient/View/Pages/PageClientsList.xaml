@@ -9,25 +9,54 @@
       d:DesignWidth="800"
       Loaded="LoadClientsList">
 
-    <ListView x:Name="listViewMain"
-              Background="#DCECFF"
-              BorderThickness="0"
-              Padding="5"
-              ScrollViewer.CanContentScroll="False"
-              ItemTemplate="{StaticResource clientsDataTemplate}">
-        <ListView.ItemContainerStyle>
-            <Style TargetType="{x:Type ListViewItem}">
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver"
-                             Value="True">
-                        <Setter Property="IsSelected"
-                                Value="True"/>
-                    </Trigger>
-                </Style.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                <EventSetter Event="MouseDoubleClick"
+        <StackPanel Grid.Row="0"
+                    Background="#B5D7FF"
+                    Orientation="Horizontal">
+            <StackPanel Orientation="Vertical">
+                <Label Content="Text"/>
+                <TextBox/>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical">
+                <Label Content="Text"/>
+                <TextBox/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Vertical">
+                <Label Content="Text"/>
+                <TextBox/>
+            </StackPanel>
+        </StackPanel>
+
+        <Grid Grid.Row="1"
+              Background="#DCECFF">
+            <ListView x:Name="listViewMain"
+                      Grid.Row="1"
+                      BorderThickness="0"
+                      Padding="5"
+                      ScrollViewer.CanContentScroll="False"
+                      ItemTemplate="{StaticResource clientsDataTemplate}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+                             Value="True">
+                                <Setter Property="IsSelected"
+                                Value="True"/>
+                            </Trigger>
+                        </Style.Triggers>
+
+                        <EventSetter Event="MouseDoubleClick"
                              Handler="EditSelectedClient"/>
-            </Style>
-        </ListView.ItemContainerStyle>
-    </ListView>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
+    </Grid>
 </Page>
