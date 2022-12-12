@@ -11,4 +11,10 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="View\Pages\PageTransactionssList.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>
