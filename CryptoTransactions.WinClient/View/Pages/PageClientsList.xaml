@@ -73,12 +73,12 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1"
-              Background="#DCECFF">
+        <Grid Grid.Row="1">
             <ListView x:Name="listViewMain"
                       Grid.Row="1"
                       BorderThickness="0"
                       Padding="5"
+                      Background="#DCECFF"
                       ScrollViewer.CanContentScroll="False"
                       ItemTemplate="{StaticResource clientsDataTemplate}"
                       SelectionMode="Single">

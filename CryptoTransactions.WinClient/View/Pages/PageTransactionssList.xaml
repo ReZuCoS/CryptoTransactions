@@ -9,25 +9,34 @@
       d:DesignWidth="800"
       Loaded="LoadTransactionsList">
 
-    <ListView x:Name="listViewMain"
-              Background="#DCECFF"
-              BorderThickness="0"
-              Padding="5"
-              ScrollViewer.CanContentScroll="False"
-              ItemTemplate="{StaticResource transactionsDataTemplate}">
-        <ListView.ItemContainerStyle>
-            <Style TargetType="{x:Type ListViewItem}">
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver"
-                             Value="True">
-                        <Setter Property="IsSelected"
-                                Value="True"/>
-                    </Trigger>
-                </Style.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
 
-                <EventSetter Event="MouseDoubleClick"
-                             Handler="EditSelectedTransaction"/>
-            </Style>
-        </ListView.ItemContainerStyle>
-    </ListView>
+        <ListView x:Name="listViewMain"
+                  Grid.Row="1"
+                  Background="#DCECFF"
+                  BorderThickness="0"
+                  Padding="5"
+                  ScrollViewer.CanContentScroll="False"
+                  ItemTemplate="{StaticResource transactionsDataTemplate}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="IsSelected"
+                                    Value="True"/>
+                        </Trigger>
+                    </Style.Triggers>
+
+                    <EventSetter Event="MouseDoubleClick"
+                                 Handler="EditSelectedTransaction"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+    </Grid>
 </Page>
