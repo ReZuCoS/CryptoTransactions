@@ -32,11 +32,45 @@
 
         <Grid Grid.Column="0"
               Grid.Row="0">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility"
+                            Value="Visible"/>
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding
+                                        ElementName=txtBoxWalletNumber,
+                                        Path=Text}"
+                                     Value="">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            
             <Label Content="Wallet number:"/>
         </Grid>
 
         <Grid Grid.Column="2"
               Grid.Row="0">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility"
+                            Value="Visible"/>
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding
+                                        ElementName=txtBoxWalletNumber,
+                                        Path=Text}"
+                                     Value="">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            
             <TextBox x:Name="txtBoxWalletNumber"
                      Height="30"
                      VerticalContentAlignment="Center"
@@ -119,6 +153,31 @@
                     Content="Save"
                     Click="SaveChanges"/>
 
+            <Button Grid.Column="1"
+                    Width="200"
+                    Height="35"
+                    Margin="10"
+                    Content="Remove"
+                    Click="RemoveClient">
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Visibility"
+                            Value="Visible"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding
+                                        ElementName=txtBoxWalletNumber,
+                                        Path=Text}"
+                                     Value="">
+                                <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            
             <Button Grid.Column="2"
                     Width="200"
                     Height="35"

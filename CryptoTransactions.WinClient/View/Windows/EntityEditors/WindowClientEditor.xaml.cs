@@ -8,6 +8,9 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
     {
         private readonly Client _client;
 
+        public WindowClientEditor() : this(new Client())
+        { }
+
         public WindowClientEditor(Client client)
         {
             InitializeComponent();
@@ -24,8 +27,9 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
             txtBoxPatronymic.Text = client.Patronymic;
             txtBoxBalance.Text = client.Balance.ToString();
 
-            listViewTransactions.ItemsSource =
-                await WebApi.GetAll<Transaction>($"clients/{client.WalletNumber}/transactions");
+            if (!string.IsNullOrEmpty(client.WalletNumber))
+                listViewTransactions.ItemsSource =
+                    await WebApi.GetAll<Transaction>($"clients/{client.WalletNumber}/transactions");
         }
 
         private async void SaveChanges(object sender, RoutedEventArgs e)
@@ -35,12 +39,28 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
             _client.Patronymic = txtBoxPatronymic.Text;
             _client.Balance = double.Parse(txtBoxBalance.Text);
 
-            var responce = await WebApi.Update($"clients/{_client.WalletNumber}", _client);
+            var response = string.IsNullOrEmpty(_client.WalletNumber)
+                ? await WebApi.Post($"clients", _client)
+                : await WebApi.Update($"clients/{_client.WalletNumber}", _client);
 
-            if (responce.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
                 this.DialogResult = true;
-            else
-                MessageBox.Show("Произошла ошибка при сохранении данных!");
+        }
+
+        private async void RemoveClient(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show($"Вы действительно хотите удалить клиента:\n" +
+                $"{_client.Surname} {_client.Name}?\n" +
+                $"Отменить данное действие невозможно!",
+                "Подтвердите удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.No)
+                return;
+
+            var response = await WebApi.Delete($"clients/{_client.WalletNumber}");
+
+            if (response.IsSuccessStatusCode)
+                this.DialogResult = true;
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e)
