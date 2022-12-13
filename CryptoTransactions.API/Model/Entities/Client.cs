@@ -74,6 +74,12 @@ namespace CryptoTransactions.API.Model.Entities
         public void GenerateNewWalletNumber() =>
             WalletNumber = NewId.NextGuid().ToString().ToLower();
 
+        /// <summary>
+        /// Transfers amount of money to client
+        /// </summary>
+        /// <param name="client">Recipient</param>
+        /// <param name="amount">Transfer amount</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public void TransferTo(Client client, double amount)
         {
             Balance -= amount <= Balance ? amount :
