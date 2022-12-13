@@ -13,26 +13,65 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0"
-                    Background="#B5D7FF"
-                    Orientation="Horizontal">
-            <StackPanel Orientation="Vertical">
-                <Label Content="Text"/>
-                <TextBox/>
+        <Grid Grid.Row="0"
+              Background="#B5D7FF">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0"
+                        Orientation="Vertical"
+                        Margin="10 5">
+                <Label Content="Surname:"/>
+                <TextBox x:Name="txtBoxSurname"
+                         Width="200"
+                         TextChanged="UpdateListOnTextChange"/>
             </StackPanel>
 
-            <StackPanel Orientation="Vertical">
-                <Label Content="Text"/>
-                <TextBox/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Vertical"
+                        Margin="10 5">
+                <Label Content="Name:"/>
+                <TextBox x:Name="txtBoxName"
+                         Width="200"
+                         TextChanged="UpdateListOnTextChange"/>
             </StackPanel>
-            
-            <StackPanel Orientation="Vertical">
-                <Label Content="Text"/>
-                <TextBox/>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Vertical"
+                        Margin="10 5">
+                <Label Content="Pathronymic:"/>
+                <TextBox x:Name="txtBoxPathronymic"
+                         Width="200"
+                         TextChanged="UpdateListOnTextChange"/>
             </StackPanel>
-        </StackPanel>
+
+            <StackPanel Grid.Column="4"
+                        Orientation="Vertical"
+                        Margin="10 5"
+                        HorizontalAlignment="Right">
+                <Label Content="Rows:"/>
+                <ComboBox x:Name="cboxLimit"
+                          IsReadOnly="True"
+                          Width="50"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="10"/>
+                    <ComboBoxItem Content="20"
+                                  IsSelected="True"/>
+                    <ComboBoxItem Content="50"/>
+                    <ComboBoxItem Content="75"/>
+                    <ComboBoxItem Content="100"/>
+                </ComboBox>
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1"
               Background="#DCECFF">
@@ -51,12 +90,64 @@
                                 Value="True"/>
                             </Trigger>
                         </Style.Triggers>
-
+                        
                         <EventSetter Event="MouseDoubleClick"
                              Handler="EditSelectedClient"/>
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Background="#B5D7FF">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  Margin="10">
+                <Button Content="Add client"
+                        Padding="5"
+                        Click="AddNewClient"/>
+            </Grid>
+
+            <Grid Grid.Column="2"
+                  Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="&lt;"
+                            Padding="5" Click="GoPreviousPage">
+                        <Button.Style>
+                            <Style TargetType="Button"
+                                   BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="IsEnabled"
+                                        Value="True"/>
+                                
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding
+                                            ElementName=txtBoxPageNumber,
+                                            Path=Text}"
+                                         Value="1">
+                                        <Setter Property="IsEnabled"
+                                        Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <TextBox x:Name="txtBoxPageNumber"
+                             Margin="10 0"
+                             Width="50"
+                             Text="1"
+                             HorizontalContentAlignment="Center"
+                             VerticalContentAlignment="Center"/>
+
+                    <Button Content="&gt;"
+                            Padding="5" Click="GoNextPage"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Page>
