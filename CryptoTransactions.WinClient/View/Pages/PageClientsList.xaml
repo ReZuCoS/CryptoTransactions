@@ -80,17 +80,10 @@
                       BorderThickness="0"
                       Padding="5"
                       ScrollViewer.CanContentScroll="False"
-                      ItemTemplate="{StaticResource clientsDataTemplate}">
+                      ItemTemplate="{StaticResource clientsDataTemplate}"
+                      SelectionMode="Single">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-                             Value="True">
-                                <Setter Property="IsSelected"
-                                Value="True"/>
-                            </Trigger>
-                        </Style.Triggers>
-                        
                         <EventSetter Event="MouseDoubleClick"
                              Handler="EditSelectedClient"/>
                     </Style>
