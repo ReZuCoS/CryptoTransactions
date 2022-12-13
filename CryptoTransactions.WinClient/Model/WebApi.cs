@@ -29,7 +29,15 @@ namespace CryptoTransactions.WinClient.Model
             return JsonConvert.DeserializeObject<T>(await GetResponseContent(response));
         }
 
-        public async static Task<HttpResponseMessage> Update(string uri, object entity)
+        public static async Task<HttpResponseMessage> Post(string uri, object entity)
+        {
+            var json = JsonConvert.SerializeObject(entity, Formatting.Indented);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            return await _httpClient.PostAsync(uri, data);
+        }
+
+        public static async Task<HttpResponseMessage> Update(string uri, object entity)
         {
             var json = JsonConvert.SerializeObject(entity, Formatting.Indented);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -37,7 +45,12 @@ namespace CryptoTransactions.WinClient.Model
             return await _httpClient.PutAsync(uri, data);
         }
 
-        private async static Task<string> GetResponseContent(HttpResponseMessage response) =>
+        public static async Task<HttpResponseMessage> Delete(string uri)
+        {
+            return await _httpClient.DeleteAsync(uri);
+        }
+
+        private static async Task<string> GetResponseContent(HttpResponseMessage response) =>
             await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
     }
 }
