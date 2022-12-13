@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:CryptoTransactions.WinClient.View.Windows"
         mc:Ignorable="d"
         Title="Crypto transactions"
-        Height="450"
-        MinHeight="400"
-        MinWidth="725"
-        Width="800">
+        Height="700"
+        MinHeight="500"
+        MinWidth="1000"
+        Width="1100">
 
     <Grid>
         <Grid.ColumnDefinitions>
