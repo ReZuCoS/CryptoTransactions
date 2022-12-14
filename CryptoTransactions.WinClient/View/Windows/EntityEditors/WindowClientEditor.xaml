@@ -5,141 +5,105 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CryptoTransactions.WinClient.View.Windows.EntityEditors"
         mc:Ignorable="d"
-        Height="500"
-        Title="ClientEditor"
-        MaxHeight="800"
-        MaxWidth="1000"
-        MinHeight="450"
-        MinWidth="625"
-        Width="700">
+        Title="Добавление клиента"
+        ResizeMode="NoResize"
+        Width="675"
+        Height="300"
+        WindowStartupLocation="CenterOwner">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="50"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
+    <Window.Resources>
+        <Style x:Key="hidesOnNullClient"
+               TargetType="RowDefinition">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding
+                                ElementName=txtBoxWalletNumber,
+                                Path=Text}"
+                             Value="">
+                    <Setter Property="Height" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
-        <Grid Grid.Column="0"
-              Grid.Row="0">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility"
-                            Value="Visible"/>
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding
-                                        ElementName=txtBoxWalletNumber,
-                                        Path=Text}"
-                                     Value="">
-                            <Setter Property="Visibility"
-                                    Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-            
-            <Label Content="Wallet number:"/>
-        </Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Style="{StaticResource hidesOnNullClient}"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Column="2"
-              Grid.Row="0">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility"
-                            Value="Visible"/>
+            <Label Content="Wallet number:"
+                   Grid.Row="0"
+                   Grid.Column="0"/>
 
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding
-                                        ElementName=txtBoxWalletNumber,
-                                        Path=Text}"
-                                     Value="">
-                            <Setter Property="Visibility"
-                                    Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-            
             <TextBox x:Name="txtBoxWalletNumber"
+                     Grid.Row="0"
+                     Grid.Column="2"
                      Height="30"
                      VerticalContentAlignment="Center"
                      IsReadOnly="True"
                      IsEnabled="False"
                      Margin="10"/>
-        </Grid>
 
-        <Grid Grid.Column="0"
-              Grid.Row="1">
-            <Label Content="Surname:"/>
-        </Grid>
+            <Label Content="Surname:"
+                   Grid.Row="1"
+                   Grid.Column="0"/>
 
-        <Grid Grid.Column="2"
-              Grid.Row="1">
             <TextBox x:Name="txtBoxSurname"
+                     Grid.Row="1"
+                     Grid.Column="2"
                      Height="30"
                      VerticalContentAlignment="Center"
                      Margin="10"/>
-        </Grid>
 
-        <Grid Grid.Column="0"
-              Grid.Row="2">
-            <Label Content="Name:"/>
-        </Grid>
+            <Label Content="Name:"
+                   Grid.Row="2"
+                   Grid.Column="0"/>
 
-        <Grid Grid.Column="2"
-              Grid.Row="2">
             <TextBox x:Name="txtBoxName"
+                     Grid.Row="2"
+                     Grid.Column="2"
                      Height="30"
                      VerticalContentAlignment="Center"
                      Margin="10"/>
-        </Grid>
 
-        <Grid Grid.Column="0"
-              Grid.Row="3">
-            <Label Content="Patronymic:"/>
-        </Grid>
+            <Label Content="Patronymic:"
+                   Grid.Row="3"
+                   Grid.Column="0"/>
 
-        <Grid Grid.Column="2"
-              Grid.Row="3">
             <TextBox x:Name="txtBoxPatronymic"
+                     Grid.Row="3"
+                     Grid.Column="2"
                      Height="30"
                      VerticalContentAlignment="Center"
                      Margin="10"/>
-        </Grid>
 
-        <Grid Grid.Column="0"
-              Grid.Row="4">
-            <Label Content="Balance:"/>
-        </Grid>
+            <Label Content="Balance:"
+                   Grid.Row="4"
+                   Grid.Column="0"/>
 
-        <Grid Grid.Column="2"
-              Grid.Row="4">
             <TextBox x:Name="txtBoxBalance"
+                     Grid.Row="4"
+                     Grid.Column="2"
                      Height="30"
                      VerticalContentAlignment="Center"
-                     Margin="10"/>
+                     Margin="10"
+                     Text="0,0">
+            </TextBox>
         </Grid>
-
-        <Grid Grid.ColumnSpan="3"
-              Grid.Row="5">
-            <ListView x:Name="listViewTransactions"
-                      ItemTemplate="{StaticResource transactionsDataTemplate}"/>
-        </Grid>
-
-        <Grid Grid.ColumnSpan="3"
-              Grid.Row="6"
-              Background="#B5D7FF">
+        
+        <Grid Background="#B5D7FF"
+              DockPanel.Dock="Bottom"
+              Height="auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
@@ -147,16 +111,10 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
-                    Width="200"
-                    Height="35"
-                    Margin="10"
                     Content="Save"
                     Click="SaveChanges"/>
 
             <Button Grid.Column="1"
-                    Width="200"
-                    Height="35"
-                    Margin="10"
                     Content="Remove"
                     Click="RemoveClient">
                 <Button.Style>
@@ -177,13 +135,41 @@
                     </Style>
                 </Button.Style>
             </Button>
-            
+
             <Button Grid.Column="2"
-                    Width="200"
-                    Height="35"
-                    Margin="10"
                     Content="Back"
                     Click="CloseWindow"/>
         </Grid>
-    </Grid>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Style="{StaticResource hidesOnNullClient}"/>
+                <RowDefinition d:Height="0"
+                               Style="{StaticResource hidesOnNullClient}"
+                               Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <ListView x:Name="listViewTransactions"
+                      Grid.ColumnSpan="3"
+                      Grid.Row="0"
+                      ScrollViewer.CanContentScroll="False"
+                      ItemTemplate="{StaticResource transactionsDataTemplate}"/>
+
+            <Button Grid.Column="0"
+                    Grid.Row="1"
+                    Content="Add"
+                    Click="AddTransaction"/>
+
+            <Button Grid.Column="2"
+                    Grid.Row="1"
+                    Content="Delete"
+                    Click="DeleteTransaction"/>
+        </Grid>
+    </DockPanel>
 </Window>
