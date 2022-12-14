@@ -8,12 +8,16 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
     {
         private readonly Client _client;
 
-        public WindowClientEditor() : this(new Client())
-        { }
-
-        public WindowClientEditor(Client client)
+        public WindowClientEditor()
         {
             InitializeComponent();
+            _client = new();
+        }
+
+        public WindowClientEditor(Client client) : this()
+        {
+            this.Height = 675;
+            this.Title = "Изменение клиента";
 
             _client = client;
             LoadClientData(_client);
@@ -25,7 +29,7 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
             txtBoxSurname.Text = client.Surname;
             txtBoxName.Text = client.Name;
             txtBoxPatronymic.Text = client.Patronymic;
-            txtBoxBalance.Text = client.Balance.ToString();
+            txtBoxBalance.Text = $"{client.Balance.ToString():00}";
 
             if (!string.IsNullOrEmpty(client.WalletNumber))
                 listViewTransactions.ItemsSource =
@@ -61,6 +65,35 @@ namespace CryptoTransactions.WinClient.View.Windows.EntityEditors
 
             if (response.IsSuccessStatusCode)
                 this.DialogResult = true;
+        }
+
+        private void AddTransaction(object sender, RoutedEventArgs e)
+        {
+            var isSuccess = new WindowTransactionEditor(_client)
+                .ShowDialog();
+
+        }
+
+        private async void DeleteTransaction(object sender, RoutedEventArgs e)
+        {
+            var selectedTransaction = (Transaction)listViewTransactions.SelectedItem;
+
+            if (selectedTransaction is null)
+                return;
+
+            var messageBoxResult = MessageBox.Show("Вы действительно хотите удалить транзакцию\n" +
+                $"{selectedTransaction.GUID}?\n" +
+                $"Данное действие невозможно отменить!", "Подтвердите действие",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (messageBoxResult == MessageBoxResult.No)
+                return;
+
+            var response = await WebApi.Delete($"transactions/{selectedTransaction.GUID}");
+
+            if (response.IsSuccessStatusCode)
+                listViewTransactions.ItemsSource =
+                    await WebApi.GetAll<Transaction>($"clients/{_client.WalletNumber}/transactions");
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e)
