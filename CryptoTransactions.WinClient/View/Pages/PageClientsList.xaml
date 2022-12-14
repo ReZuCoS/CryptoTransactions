@@ -110,7 +110,10 @@
                   Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="&lt;"
-                            Padding="5" Click="GoPreviousPage">
+                            Padding="5"
+                            Margin="0"
+                            Width="auto"
+                            Click="GoPreviousPage">
                         <Button.Style>
                             <Style TargetType="Button"
                                    BasedOn="{StaticResource {x:Type Button}}">
@@ -138,7 +141,10 @@
                              VerticalContentAlignment="Center"/>
 
                     <Button Content="&gt;"
-                            Padding="5" Click="GoNextPage"/>
+                            Padding="5"
+                            Margin="0"
+                            Width="auto"
+                            Click="GoNextPage"/>
                 </StackPanel>
             </Grid>
         </Grid>
